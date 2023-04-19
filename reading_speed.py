@@ -10,7 +10,7 @@ import nltk
 import pyphen
 
 
-def fleisch_ease(text: str, dic) -> float:
+def flesch_ease(text: str, dic) -> float:
     sentences = nltk.sent_tokenize(text)
     words_by_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
     average_sentence_length = sum(len(words) for words in words_by_sentences) / len(
@@ -52,7 +52,7 @@ def predicted_reading_time(
     score: Optional[float] = None,
 ) -> float:
     num_words = len(nltk.word_tokenize(text))
-    score = score if score else fleisch_ease(text)
+    score = score if score else flesch_ease(text, dic)
     return num_words / func(reading_speed, score)
 
 
@@ -69,7 +69,7 @@ def main():
     args = parser.parse_args()
 
     dic = pyphen.Pyphen(lang=args.language)
-    score = fleisch_ease(args.text, dic=dic)
+    score = flesch_ease(args.text, dic=dic)
     reading_time = predicted_reading_time(
         args.text,
         initial_adjust_func,
@@ -79,7 +79,7 @@ def main():
     )
 
     print(
-        f"Komplexität des Textes: {fleisch_ease_to_classification(score)} (Fleisch-Lesbarkeits-Index: {score:.1f})"
+        f"Komplexität des Textes: {fleisch_ease_to_classification(score)} (Flesch-Lesbarkeits-Index: {score:.1f})"
     )
     print(f"Ungefähre Lesezeit: {int(reading_time * 60)} Sekunden")
 
