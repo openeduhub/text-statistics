@@ -14,12 +14,7 @@
             black
             pyflakes
             isort
-            pandas-stubs
-            # data structures
-            numpy
-            pandas
-            # stats
-            scipy
+            # NLP
             pyphen
             nltk
           ];
