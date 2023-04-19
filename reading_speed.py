@@ -9,10 +9,8 @@ from typing import Optional
 import nltk
 import pyphen
 
-dic = pyphen.Pyphen(lang="de_DE")
 
-
-def fleisch_ease(text: str) -> float:
+def fleisch_ease(text: str, dic) -> float:
     sentences = nltk.sent_tokenize(text)
     words_by_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
     average_sentence_length = sum(len(words) for words in words_by_sentences) / len(
@@ -49,6 +47,7 @@ def fleisch_ease_to_classification(score: float) -> str:
 def predicted_reading_time(
     text: str,
     func: Callable[[float, float], float],
+    dic,
     reading_speed: float = 200.0,
     score: Optional[float] = None,
 ) -> float:
@@ -65,12 +64,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("text")
     parser.add_argument("-v", "--reading_speed", default=200.0)
+    parser.add_argument("-l", "--language", default="de_DE")
 
     args = parser.parse_args()
 
-    score = fleisch_ease(args.text)
+    dic = pyphen.Pyphen(lang=args.language)
+    score = fleisch_ease(args.text, dic=dic)
     reading_time = predicted_reading_time(
-        args.text, initial_adjust_func, reading_speed=args.reading_speed, score=score
+        args.text,
+        initial_adjust_func,
+        dic=dic,
+        reading_speed=args.reading_speed,
+        score=score,
     )
 
     print(
