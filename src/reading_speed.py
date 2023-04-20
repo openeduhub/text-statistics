@@ -28,7 +28,7 @@ def flesch_ease(text: str, dic) -> float:
     return 180 - average_sentence_length - (58.5 * average_hyphenation_length)
 
 
-def fleisch_ease_to_classification(score: float) -> str:
+def classification_from_flesch_ease(score: float) -> str:
     if score <= 30:
         return "Sehr schwer"
     if score <= 50:
@@ -79,7 +79,7 @@ def main():
     )
 
     print(
-        f"Komplexität des Textes: {fleisch_ease_to_classification(score)} (Flesch-Lesbarkeits-Index: {score:.1f})"
+        f"Komplexität des Textes: {classification_from_flesch_ease(score)} (Flesch-Lesbarkeits-Index: {score:.1f})"
     )
     print(f"Ungefähre Lesezeit: {int(reading_time * 60)} Sekunden")
 
