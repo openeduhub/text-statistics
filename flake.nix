@@ -17,6 +17,8 @@
             # NLP
             pyphen
             nltk
+            # web service
+            cherrypy
           ];
         local-python = pkgs.python310.withPackages local-python-packages;
 
