@@ -18,9 +18,9 @@ class WebService:
         text = data["text"]
         reading_speed = data.get("reading_speed", 200.0)
 
-        score = rs.flesch_ease(text, dic=self.dic)
-        classification = rs.classification_from_flesch_ease(score)
-        reading_time = rs.predicted_reading_time(
+        score = rs.calculate_flesch_ease(text, dic=self.dic)
+        classification = rs.classify_from_flesch_ease(score)
+        reading_time = rs.predict_reading_time(
             text=text,
             func=rs.initial_adjust_func,
             dic=self.dic,

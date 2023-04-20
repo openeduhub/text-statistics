@@ -10,7 +10,7 @@ import nltk
 import pyphen
 
 
-def flesch_ease(text: str, dic) -> float:
+def calculate_flesch_ease(text: str, dic) -> float:
     sentences = nltk.sent_tokenize(text)
     words_by_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
     average_sentence_length = sum(len(words) for words in words_by_sentences) / len(
@@ -28,7 +28,7 @@ def flesch_ease(text: str, dic) -> float:
     return 180 - average_sentence_length - (58.5 * average_hyphenation_length)
 
 
-def classification_from_flesch_ease(score: float) -> str:
+def classify_from_flesch_ease(score: float) -> str:
     if score <= 30:
         return "Sehr schwer"
     if score <= 50:
@@ -44,7 +44,7 @@ def classification_from_flesch_ease(score: float) -> str:
     return "Sehr leicht"
 
 
-def predicted_reading_time(
+def predict_reading_time(
     text: str,
     func: Callable[[float, float], float],
     dic,
@@ -52,7 +52,7 @@ def predicted_reading_time(
     score: Optional[float] = None,
 ) -> float:
     num_words = len(nltk.word_tokenize(text))
-    score = score if score else flesch_ease(text, dic)
+    score = score if score else calculate_flesch_ease(text, dic)
     return num_words / func(reading_speed, score)
 
 
@@ -69,8 +69,8 @@ def main():
     args = parser.parse_args()
 
     dic = pyphen.Pyphen(lang=args.language)
-    score = flesch_ease(args.text, dic=dic)
-    reading_time = predicted_reading_time(
+    score = calculate_flesch_ease(args.text, dic=dic)
+    reading_time = predict_reading_time(
         args.text,
         initial_adjust_func,
         dic=dic,
@@ -79,7 +79,7 @@ def main():
     )
 
     print(
-        f"Komplexität des Textes: {classification_from_flesch_ease(score)} (Flesch-Lesbarkeits-Index: {score:.1f})"
+        f"Komplexität des Textes: {classify_from_flesch_ease(score)} (Flesch-Lesbarkeits-Index: {score:.1f})"
     )
     print(f"Ungefähre Lesezeit: {int(reading_time * 60)} Sekunden")
 
