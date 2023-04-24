@@ -26,9 +26,10 @@ A docker image can be built through
 #+begin_src sh
 nix build git+https://codeberg.org/joka/reading-time#docker
 #+end_src
-The resulting image has to be loaded via
+The resulting image has to be loaded and executed via
 #+begin_src sh
 docker load < /path/to/result
+docker run -p 8080:8080 readingtime:1.0.2
 #+end_src
 
 * Usage

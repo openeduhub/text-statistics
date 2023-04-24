@@ -27,8 +27,8 @@
 
         pythonBuild = with local-python.pkgs;
           buildPythonPackage {
-            pname = "readingspeed";
-            version = "1.0";
+            pname = "readingtime";
+            version = "1.0.2";
 
             propagatedBuildInputs = with local-python.pkgs; [
               pyphen
@@ -39,14 +39,25 @@
             src = ./.;
           };
 
-        dockerImage = pkgs.dockerTools.buildLayeredImage {
+        dockerImage = pkgs.dockerTools.buildImage {
           name = pythonBuild.pname;
           tag = pythonBuild.version;
-          contents = [ pythonBuild ];
 
           config = {
-            Cmd = [ "bin/readingspeed" ];
+            Cmd = [
+              "${pkgs.bash}/bin/sh"
+              (pkgs.writeShellScript "runDocker.sh" ''
+                ${pkgs.unzip}/bin/unzip /nltk_data/tokenizers/punkt.zip -d /nltk_data/tokenizers &
+                /bin/readingtime
+              '')
+            ];
             WorkingDir = "/";
+          };
+
+          copyToRoot = pkgs.buildEnv {
+            name = "image-root";
+            paths = [ ./data pythonBuild ];
+            pathsToLink = [ "/" ];
           };
         };
 
