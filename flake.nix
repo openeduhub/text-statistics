@@ -44,7 +44,10 @@
           tag = pythonBuild.version;
           contents = [ pythonBuild ];
 
-          config = { Cmd = [ "${pythonBuild}/bin/readingspeed" ]; };
+          config = {
+            Cmd = [ "bin/readingspeed" ];
+            WorkingDir = "/";
+          };
         };
 
       in {
