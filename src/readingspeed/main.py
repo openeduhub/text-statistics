@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import cherrypy
-import reading_speed as rs
+import readingspeed.reading_speed as rs
 import pyphen
 
 

@@ -1,7 +1,10 @@
 {
   description = "Basic Python Environment";
 
-  inputs = { flake-utils = { url = "github:numtide/flake-utils"; }; };
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    flake-utils = { url = "github:numtide/flake-utils"; };
+  };
 
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -20,9 +23,24 @@
             # web service
             cherrypy
           ];
-        local-python = pkgs.python310.withPackages local-python-packages;
+        local-python = pkgs.python3.withPackages local-python-packages;
+
+        pythonBuild = with local-python.pkgs;
+          buildPythonPackage {
+            pname = "readingspeed";
+            version = "1.0";
+
+            propagatedBuildInputs = with local-python.pkgs; [
+              pyphen
+              nltk
+              cherrypy
+            ];
+
+            src = ./.;
+          };
 
       in {
+        defaultPackage = pythonBuild;
         devShell = pkgs.mkShell {
           buildInputs = [
             local-python

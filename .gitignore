@@ -1,3 +1,6 @@
 /.direnv/
 /.envrc
 /src/__pycache__/
+/build/
+/result
+/src/readingspeed.egg-info/
