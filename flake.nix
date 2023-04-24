@@ -39,7 +39,19 @@
             src = ./.;
           };
 
+        dockerImage = pkgs.dockerTools.buildLayeredImage {
+          name = pythonBuild.pname;
+          tag = pythonBuild.version;
+          contents = [ pythonBuild ];
+
+          config = { Cmd = [ "${pythonBuild}/bin/readingspeed" ]; };
+        };
+
       in {
+        packages = {
+          pythonPackage = pythonBuild;
+          docker = dockerImage;
+        };
         defaultPackage = pythonBuild;
         devShell = pkgs.mkShell {
           buildInputs = [
