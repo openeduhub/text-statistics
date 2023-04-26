@@ -1,12 +1,12 @@
 #+title: Simple Text Reading Length Estimator
 
-The ~Python~ script [[file:src/readingspeed/reading_speed.py]] estimates the reading time of a given text, using the following model:
+The ~Python~ script [[file:src/readingtime/readingtime.py]] estimates the reading time of a given text, using the following model:
 - It assumes a base-line reading speed of 200 WPM.
 - This reading speed is adjusted w.r.t. the Flesch-Reading-Ease of the given text.
 In particular, we set that the "real" reading speed of the text is equal to \(200 \cdot (\frac{1}{2} \exp^{\ln 4 / 121.5 \cdot s})\), where \(s\) is the Flesch-Reading-Ease.
 Thus, the reading-speed is halved at a reading ease of \(0\) (very difficult) and double at a reading ease of \(121.5\) (the highest possible value).
 
-[[file:src/readingspeed/main.py]] provides a microservice, see [[Usage]].
+[[file:src/readingtime/main.py]] provides a microservice, see [[Usage]].
 
 * Installation
 ** As Python Package
@@ -18,13 +18,13 @@ pip install .
 ** As Nix Flake
 Alternatively, with ~nix~ installed (and the ~flakes~ feature enabled), one can run the microservice through
 #+begin_src sh
-nix run git+https://codeberg.org/joka/reading-time
+nix run git+https://codeberg.org/joka/readingtime.py
 #+end_src
 
 ** As Docker Image
 A docker image can be built through
 #+begin_src sh
-nix build git+https://codeberg.org/joka/reading-time#docker
+nix build git+https://codeberg.org/joka/readingtime.py#docker
 #+end_src
 The resulting image has to be loaded and executed via
 #+begin_src sh

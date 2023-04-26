@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import cherrypy
-import readingtime.reading_speed as rs
+import readingtime.readingtime as rt
 import pyphen
 
 
@@ -18,11 +18,11 @@ class WebService:
         text = data["text"]
         reading_speed = data.get("reading_speed", 200.0)
 
-        score = rs.calculate_flesch_ease(text, dic=self.dic)
-        classification = rs.classify_from_flesch_ease(score)
-        reading_time = rs.predict_reading_time(
+        score = rt.calculate_flesch_ease(text, dic=self.dic)
+        classification = rt.classify_from_flesch_ease(score)
+        reading_time = rt.predict_reading_time(
             text=text,
-            func=rs.initial_adjust_func,
+            func=rt.initial_adjust_func,
             dic=self.dic,
             reading_speed=reading_speed,
             score=score,
