@@ -1,6 +1,6 @@
 #+title: Simple Text Reading Length Estimator
 
-The ~Python~ script [[file:./src/readingtime/readingtime.py]] estimates the reading time of a given text, using the following model:
+The ~Python~ script [[file:src/readingtime/readingtime.py]] estimates the reading time of a given text, using the following model:
 - It assumes a base-line reading speed of 200 WPM.
 - This reading speed is adjusted w.r.t. the Flesch-Reading-Ease of the given text.
 In particular, we set that the "real" reading speed of the text is equal to $200 \cdot (\frac{1}{2} \exp^{\ln 4 / 121.5 \cdot s})$, where $s$ is the Flesch-Reading-Ease.

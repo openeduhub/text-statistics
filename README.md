@@ -1,13 +1,13 @@
 
 # Table of Contents
 
-1.  [Installation](#org4205139)
-    1.  [As Python Package](#orge434e5c)
-    2.  [As Nix Flake](#orgb2afec3)
-    3.  [As Docker Image](#org837875d)
-2.  [Usage](#orgd722780)
+1.  [Installation](#orgbccb3ab)
+    1.  [As Python Package](#org9637a05)
+    2.  [As Nix Flake](#org00bb966)
+    3.  [As Docker Image](#org4c2c483)
+2.  [Usage](#orgdf19059)
 
-The `Python` script <./src/readingtime/readingtime.py> estimates the reading time of a given text, using the following model:
+The `Python` script <src/readingtime/readingtime.py> estimates the reading time of a given text, using the following model:
 
 -   It assumes a base-line reading speed of 200 WPM.
 -   This reading speed is adjusted w.r.t. the Flesch-Reading-Ease of the given text.
@@ -15,15 +15,15 @@ The `Python` script <./src/readingtime/readingtime.py> estimates the reading tim
 In particular, we set that the &ldquo;real&rdquo; reading speed of the text is equal to $200 \cdot (\frac{1}{2} \exp^{\ln 4 / 121.5 \cdot s})$, where $s$ is the Flesch-Reading-Ease.
 Thus, the reading-speed is halved at a reading ease of $0$ (very difficult) and double at a reading ease of $121.5$ (the highest possible value).
 
-<src/readingtime/main.py> provides a microservice, see [2](#orgd722780).
+<src/readingtime/main.py> provides a microservice, see [2](#orgdf19059).
 
 
-<a id="org4205139"></a>
+<a id="orgbccb3ab"></a>
 
 # Installation
 
 
-<a id="orge434e5c"></a>
+<a id="org9637a05"></a>
 
 ## As Python Package
 
@@ -32,7 +32,7 @@ This package can be installed as a Python package by cloning this repository and
     pip install .
 
 
-<a id="orgb2afec3"></a>
+<a id="org00bb966"></a>
 
 ## As Nix Flake
 
@@ -41,7 +41,7 @@ Alternatively, with `nix` installed (and the `flakes` feature enabled), one can 
     nix run git+https://codeberg.org/joka/readingtime.py
 
 
-<a id="org837875d"></a>
+<a id="org4c2c483"></a>
 
 ## As Docker Image
 
@@ -55,7 +55,7 @@ The resulting image has to be loaded and executed via
     docker run -p 8080:8080 readingtime:1.0.2
 
 
-<a id="orgd722780"></a>
+<a id="orgdf19059"></a>
 
 # Usage
 
