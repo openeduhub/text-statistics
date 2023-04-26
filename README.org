@@ -3,8 +3,8 @@
 The ~Python~ script [[file:src/readingtime/readingtime.py]] estimates the reading time of a given text, using the following model:
 - It assumes a base-line reading speed of 200 WPM.
 - This reading speed is adjusted w.r.t. the Flesch-Reading-Ease of the given text.
-In particular, we set that the "real" reading speed of the text is equal to \(200 \cdot (\frac{1}{2} \exp^{\ln 4 / 121.5 \cdot s})\), where \(s\) is the Flesch-Reading-Ease.
-Thus, the reading-speed is halved at a reading ease of \(0\) (very difficult) and double at a reading ease of \(121.5\) (the highest possible value).
+In particular, we set that the "real" reading speed of the text is equal to $200 \cdot (\frac{1}{2} \exp^{\ln 4 / 121.5 \cdot s})$, where $s$ is the Flesch-Reading-Ease.
+Thus, the reading-speed is halved at a reading ease of $0$ (very difficult) and double at a reading ease of $121.5$ (the highest possible value).
 
 [[file:src/readingtime/main.py]] provides a microservice, see [[Usage]].
 
