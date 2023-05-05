@@ -1,29 +1,31 @@
 
 # Table of Contents
 
-1.  [Installation](#orgbccb3ab)
-    1.  [As Python Package](#org9637a05)
-    2.  [As Nix Flake](#org00bb966)
-    3.  [As Docker Image](#org4c2c483)
-2.  [Usage](#orgdf19059)
+1.  [Installation](#org0fc710f)
+    1.  [As Python Package](#orgd27d2dc)
+    2.  [As Nix Flake](#org438bc01)
+    3.  [As Docker Image](#orgb22f1eb)
+2.  [Usage](#org154e0e6)
 
 The `Python` script <src/readingtime/readingtime.py> estimates the reading time of a given text, using the following model:
 
 -   It assumes a base-line reading speed of 200 WPM.
 -   This reading speed is adjusted w.r.t. the Flesch-Reading-Ease of the given text.
 
-In particular, we set that the &ldquo;real&rdquo; reading speed of the text is equal to $200 \cdot (\frac{1}{2} \exp^{\ln 4 / 121.5 \cdot s})$, where $s$ is the Flesch-Reading-Ease.
+In particular, we set that the "real" reading speed of the text is equal to $200 \cdot (\frac{1}{2} \exp^{\ln 4 / 121.5 \cdot s})$, where $s$ is the Flesch-Reading-Ease.
 Thus, the reading-speed is halved at a reading ease of $0$ (very difficult) and double at a reading ease of $121.5$ (the highest possible value).
+We chose an exponential function for this purpose because of its monotonicity and the fact that it is always above 0.
+Other, possibly more sophisticated models, are also possible and could be studied and implemented in the future.
 
-<src/readingtime/main.py> provides a microservice, see [2](#orgdf19059).
+<src/readingtime/main.py> provides a microservice, see [2](#org154e0e6).
 
 
-<a id="orgbccb3ab"></a>
+<a id="org0fc710f"></a>
 
 # Installation
 
 
-<a id="org9637a05"></a>
+<a id="orgd27d2dc"></a>
 
 ## As Python Package
 
@@ -32,16 +34,16 @@ This package can be installed as a Python package by cloning this repository and
     pip install .
 
 
-<a id="org00bb966"></a>
+<a id="org438bc01"></a>
 
 ## As Nix Flake
 
-Alternatively, with `nix` installed (and the `flakes` feature enabled), one can run the microservice through
+Alternatively, with [nix](https://nixos.org/) installed (and the [flakes](https://nixos.wiki/wiki/Flakes#Enable_flakes) feature enabled), one can run the microservice through
 
     nix run git+https://codeberg.org/joka/readingtime.py
 
 
-<a id="org4c2c483"></a>
+<a id="orgb22f1eb"></a>
 
 ## As Docker Image
 
@@ -55,7 +57,7 @@ The resulting image has to be loaded and executed via
     docker run -p 8080:8080 readingtime:1.0.2
 
 
-<a id="orgdf19059"></a>
+<a id="org154e0e6"></a>
 
 # Usage
 
