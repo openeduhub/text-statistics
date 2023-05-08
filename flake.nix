@@ -128,9 +128,9 @@
         local-python = pkgs.python3.withPackages local-python-packages;
 
         pythonBuild = with local-python.pkgs;
-          buildPythonPackage {
+          buildPythonApplication {
             pname = "readingtime";
-            version = "1.0.2";
+            version = "1.0.3";
 
             propagatedBuildInputs = with local-python.pkgs; [
               pyphen
