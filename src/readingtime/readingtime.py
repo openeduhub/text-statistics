@@ -78,9 +78,8 @@ def main():
         score=score,
     )
 
-    print(
-        f"Komplexität des Textes: {classify_from_flesch_ease(score)} (Flesch-Lesbarkeits-Index: {score:.1f})"
-    )
+    print(f"Komplexität des Textes: {classify_from_flesch_ease(score)}")
+    print(f"(Flesch-Lesbarkeits-Index: {score:.1f})")
     print(f"Ungefähre Lesezeit: {int(reading_time * 60)} Sekunden")
 
 

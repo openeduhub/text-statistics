@@ -15,7 +15,7 @@ class WebService:
     @cherrypy.tools.json_out()
     def analyze_text(self):
         target_language = "de"
-        
+
         data = cherrypy.request.json
 
         if "text" in data:
@@ -23,9 +23,7 @@ class WebService:
         elif "url" in data:
             url = data["url"]
             text = grab_content(
-                url,
-                favor_precision=True,
-                target_language=target_language
+                url, favor_precision=True, target_language=target_language
             )
             # no content could be grabbed
             if text is None:
