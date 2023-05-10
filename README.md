@@ -1,11 +1,11 @@
 
 # Table of Contents
 
-1.  [Installation](#org0fc710f)
-    1.  [As Python Package](#orgd27d2dc)
-    2.  [As Nix Flake](#org438bc01)
-    3.  [As Docker Image](#orgb22f1eb)
-2.  [Usage](#org154e0e6)
+1.  [Installation](#orgbb7f09a)
+    1.  [As Python Package](#org8ac3d37)
+    2.  [As Nix Flake](#org57671f3)
+    3.  [As Docker Image](#orgd88a354)
+2.  [Usage](#orgd36b3c6)
 
 The `Python` script <src/readingtime/readingtime.py> estimates the reading time of a given text, using the following model:
 
@@ -17,15 +17,15 @@ Thus, the reading-speed is halved at a reading ease of $0$ (very difficult) and 
 We chose an exponential function for this purpose because of its monotonicity and the fact that it is always above 0.
 Other, possibly more sophisticated models, are also possible and could be studied and implemented in the future.
 
-<src/readingtime/main.py> provides a microservice, see [2](#org154e0e6).
+<src/readingtime/main.py> provides a microservice, see [2](#orgd36b3c6).
 
 
-<a id="org0fc710f"></a>
+<a id="orgbb7f09a"></a>
 
 # Installation
 
 
-<a id="orgd27d2dc"></a>
+<a id="org8ac3d37"></a>
 
 ## As Python Package
 
@@ -34,7 +34,7 @@ This package can be installed as a Python package by cloning this repository and
     pip install .
 
 
-<a id="org438bc01"></a>
+<a id="org57671f3"></a>
 
 ## As Nix Flake
 
@@ -43,7 +43,7 @@ Alternatively, with [nix](https://nixos.org/) installed (and the [flakes](https:
     nix run git+https://codeberg.org/joka/readingtime.py
 
 
-<a id="orgb22f1eb"></a>
+<a id="orgd88a354"></a>
 
 ## As Docker Image
 
@@ -54,10 +54,10 @@ A docker image can be built through
 The resulting image has to be loaded and executed via
 
     docker load < /path/to/result
-    docker run -p 8080:8080 readingtime:1.0.2
+    docker run -p 8080:8080 readingtime:1.0.3
 
 
-<a id="org154e0e6"></a>
+<a id="orgd36b3c6"></a>
 
 # Usage
 

@@ -32,7 +32,7 @@ nix build github:openeduhub/text-statistics#docker
 The resulting image has to be loaded and executed via
 #+begin_src sh
 docker load < /path/to/result
-docker run -p 8080:8080 readingtime:1.0.2
+docker run -p 8080:8080 readingtime:1.0.3
 #+end_src
 
 * Usage
