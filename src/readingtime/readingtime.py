@@ -10,18 +10,24 @@ import nltk
 import pyphen
 
 
-def calculate_flesch_ease(text: str, dic) -> float:
+def calculate_flesch_ease(text: str, pyphen_dic) -> float:
+    # fragment the given text into sentences,
+    # and sentences into words
     sentences = nltk.sent_tokenize(text)
     words_by_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
     average_sentence_length = sum(len(words) for words in words_by_sentences) / len(
         words_by_sentences
     )
+
+    # fragment each word into its syllables
     hyphenations = [
-        dic.inserted(word).split("-")
+        pyphen_dic.inserted(word).split("-")
         for words in words_by_sentences
         for word in words
         if not word in string.punctuation
     ]
+
+    # calculate the Flesch-ease for German
     average_hyphenation_length = sum(
         len(hyphenation) for hyphenation in hyphenations
     ) / len(hyphenations)
@@ -51,12 +57,21 @@ def predict_reading_time(
     reading_speed: float = 200.0,
     score: Optional[float] = None,
 ) -> float:
+    """
+    Predict the reading time by taking an assumed reading time,
+    modifying it using the given function according to the Flesch-ease,
+    and applying it to the number of words in the given text.
+    """
     num_words = len(nltk.word_tokenize(text))
     score = score if score else calculate_flesch_ease(text, dic)
     return num_words / func(reading_speed, score)
 
 
 def initial_adjust_func(reading_speed: float, score: float) -> float:
+    """
+    An initial example of a possible relationship between Flesch-ease
+    and reading speed
+    """
     return reading_speed / 2 * math.exp(math.log(4) / 121.5 * score)
 
 
@@ -69,7 +84,7 @@ def main():
     args = parser.parse_args()
 
     dic = pyphen.Pyphen(lang=args.language)
-    score = calculate_flesch_ease(args.text, dic=dic)
+    score = calculate_flesch_ease(args.text, pyphen_dic=dic)
     reading_time = predict_reading_time(
         args.text,
         initial_adjust_func,
