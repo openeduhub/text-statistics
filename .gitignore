@@ -6,3 +6,4 @@
 /src/readingspeed.egg-info/
 **/ltximg/*
 *\~
+**/__pycache__
