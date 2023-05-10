@@ -1,11 +1,11 @@
 
 # Table of Contents
 
-1.  [Installation](#orgbb7f09a)
-    1.  [As Python Package](#org8ac3d37)
-    2.  [As Nix Flake](#org57671f3)
-    3.  [As Docker Image](#orgd88a354)
-2.  [Usage](#orgd36b3c6)
+1.  [Installation](#org5df1ad1)
+    1.  [As Python Package](#org3f25f58)
+    2.  [As Nix Flake](#org71cc7d3)
+    3.  [As Docker Image](#org0b2b50d)
+2.  [Usage](#org2f2e201)
 
 The `Python` script <src/readingtime/readingtime.py> estimates the reading time of a given text, using the following model:
 
@@ -17,15 +17,15 @@ Thus, the reading-speed is halved at a reading ease of $0$ (very difficult) and 
 We chose an exponential function for this purpose because of its monotonicity and the fact that it is always above 0.
 Other, possibly more sophisticated models, are also possible and could be studied and implemented in the future.
 
-<src/readingtime/main.py> provides a microservice, see [2](#orgd36b3c6).
+<src/readingtime/main.py> provides a microservice, see [2](#org2f2e201).
 
 
-<a id="orgbb7f09a"></a>
+<a id="org5df1ad1"></a>
 
 # Installation
 
 
-<a id="org8ac3d37"></a>
+<a id="org3f25f58"></a>
 
 ## As Python Package
 
@@ -34,7 +34,7 @@ This package can be installed as a Python package by cloning this repository and
     pip install .
 
 
-<a id="org57671f3"></a>
+<a id="org71cc7d3"></a>
 
 ## As Nix Flake
 
@@ -43,7 +43,7 @@ Alternatively, with [nix](https://nixos.org/) installed (and the [flakes](https:
     nix run git+https://codeberg.org/joka/readingtime.py
 
 
-<a id="orgd88a354"></a>
+<a id="org0b2b50d"></a>
 
 ## As Docker Image
 
@@ -57,7 +57,7 @@ The resulting image has to be loaded and executed via
     docker run -p 8080:8080 readingtime:1.0.3
 
 
-<a id="orgd36b3c6"></a>
+<a id="org2f2e201"></a>
 
 # Usage
 
@@ -69,4 +69,8 @@ For example:
 The result contains the Flesch-ease, the corresponding classification, and the predicted reading time (in seconds):
 
     {"flesh-ease": 43.39452054794519, "classification": "Schwer", "reading-time": 29.987166756508653}
+
+As an alternative to providing the text to be processed directly, it is also possible to give the service a URL, which will then be crawled for content to analyze. Note that this does not work on Websites that heavily rely on `JavaScript`.
+
+    curl -d '{"url": "https://de.wikipedia.org/wiki/Deutschland"}' -H "Content-Type: application/json" -X POST localhost:8080/analyze-text
 

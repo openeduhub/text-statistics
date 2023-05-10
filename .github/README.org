@@ -46,3 +46,8 @@ The result contains the Flesch-ease, the corresponding classification, and the p
 #+begin_src json
 {"flesh-ease": 43.39452054794519, "classification": "Schwer", "reading-time": 29.987166756508653}
 #+end_src
+
+As an alternative to providing the text to be processed directly, it is also possible to give the service a URL, which will then be crawled for content to analyze. Note that this does not work on Websites that heavily rely on ~JavaScript~.
+#+begin_src sh
+curl -d '{"url": "https://de.wikipedia.org/wiki/Deutschland"}' -H "Content-Type: application/json" -X POST localhost:8080/analyze-text
+#+end_src
