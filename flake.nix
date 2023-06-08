@@ -133,7 +133,7 @@
 
         # declare, how the python package shall be built
         pythonBuild = with python-build.pkgs;
-          buildPythonApplication {
+          buildPythonPackage {
             pname = "text_statistics";
             version = "1.0.3";
 
