@@ -129,7 +129,7 @@
 
         pythonBuild = with local-python.pkgs;
           buildPythonApplication {
-            pname = "readingtime";
+            pname = "text_statistics";
             version = "1.0.3";
 
             propagatedBuildInputs = with local-python.pkgs; [
@@ -151,7 +151,7 @@
               "${pkgs.bash}/bin/sh"
               (pkgs.writeShellScript "runDocker.sh" ''
                 ${pkgs.unzip}/bin/unzip /nltk_data/tokenizers/punkt.zip -d /nltk_data/tokenizers &
-                /bin/readingtime
+                /bin/text_statistics
               '')
             ];
             WorkingDir = "/";

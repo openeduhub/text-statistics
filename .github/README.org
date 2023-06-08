@@ -1,15 +1,15 @@
 #+title: GitHub Specific README
 
-The ~Python~ script [[file:../src/readingtime/readingtime.py]] estimates the reading time of a given text, using the following model:
+The ~Python~ script [[file:../src/text_statistics/text_statistics.py]] estimates the reading time of a given text, using the following model:
 - It assumes a base-line reading speed of 200 WPM.
 - This reading speed is adjusted w.r.t. the Flesch-Reading-Ease of the given text.
 
-In particular, we set that the "real" reading speed of the text is equal to $200 \cdot (\frac{1}{2} \exp^{\ln 4 / 121.5 \cdot s})$, where $s$ is the Flesch-Reading-Ease.
+In particular, we set that the "real" reading speed of the text is equal to $200 \cdot \left(\frac{1}{2} \exp(\ln(4) / 121.5 \cdot s)\right)$, where $s$ is the Flesch-Reading-Ease.
 Thus, the reading-speed is halved at a reading ease of $0$ (very difficult) and double at a reading ease of $121.5$ (the highest possible value).
 We chose an exponential function for this purpose because of its monotonicity and the fact that it is always above 0.
 Other, possibly more sophisticated models, are also possible and could be studied and implemented in the future.
 
-[[file:../src/readingtime/main.py]] provides a microservice, see [[Usage]].
+[[file:../src/text_statistics/main.py]] provides a microservice, see [[Usage]].
 
 * Installation
 ** As Python Package
@@ -32,7 +32,7 @@ nix build github:openeduhub/text-statistics#docker
 The resulting image has to be loaded and executed via
 #+begin_src sh
 docker load < /path/to/result
-docker run -p 8080:8080 readingtime:1.0.3
+docker run -p 8080:8080 text_statistics:1.0.3
 #+end_src
 
 * Usage

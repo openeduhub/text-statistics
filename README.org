@@ -1,6 +1,6 @@
 #+title: Simple Text Reading Length Estimator
 
-The ~Python~ script [[file:src/readingtime/readingtime.py]] estimates the reading time of a given text, using the following model:
+The ~Python~ script [[file:.src/text_statistics/text_statistics.py]] estimates the reading time of a given text, using the following model:
 - It assumes a base-line reading speed of 200 WPM.
 - This reading speed is adjusted w.r.t. the Flesch-Reading-Ease of the given text.
 
@@ -9,7 +9,7 @@ Thus, the reading-speed is halved at a reading ease of $0$ (very difficult) and 
 We chose an exponential function for this purpose because of its monotonicity and the fact that it is always above 0.
 Other, possibly more sophisticated models, are also possible and could be studied and implemented in the future.
 
-[[file:src/readingtime/main.py]] provides a microservice, see [[Usage]].
+[[file:src/text_statistics/main.py]] provides a microservice, see [[Usage]].
 
 * Installation
 ** As Python Package
@@ -21,18 +21,18 @@ pip install .
 ** As Nix Flake
 Alternatively, with [[https://nixos.org/][nix]] installed (and the [[https://nixos.wiki/wiki/Flakes#Enable_flakes][flakes]] feature enabled), one can run the microservice through
 #+begin_src sh
-nix run git+https://codeberg.org/joka/readingtime.py
+nix run git+https://codeberg.org/joka/text_statistics.py
 #+end_src
 
 ** As Docker Image
 A docker image can be built through
 #+begin_src sh
-nix build git+https://codeberg.org/joka/readingtime.py#docker
+nix build git+https://codeberg.org/joka/text_statistics.py#docker
 #+end_src
 The resulting image has to be loaded and executed via
 #+begin_src sh
 docker load < /path/to/result
-docker run -p 8080:8080 readingtime:1.0.3
+docker run -p 8080:8080 text_statistics:1.0.3
 #+end_src
 
 * Usage
