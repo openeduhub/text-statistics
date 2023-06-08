@@ -11,6 +11,7 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
+        # build required packages from pypi
         charset-normalizer = with pkgs.python3Packages;
           buildPythonPackage rec {
             pname = "charset-normalizer";
@@ -109,39 +110,39 @@
               pycurl
             ];
           };
-        
-        local-python-packages = python-packages:
+
+        # declare the python packages used for building & developing
+        python-packages-build = python-packages:
           with python-packages; [
-            # supplements for programming
+            pyphen
+            nltk
+            cherrypy
+            trafilatura
+          ];
+        
+        python-packages-devel = python-packages:
+          with python-packages; [
             black
             pyflakes
             isort
             ipython
-            # NLP
-            pyphen
-            nltk
-            # web service
-            cherrypy
-            # content scraping
-            trafilatura
-          ];
-        local-python = pkgs.python3.withPackages local-python-packages;
+          ] ++ (python-packages-build python-packages);
+        
+        python-build = pkgs.python3.withPackages python-packages-build;
+        python-devel = pkgs.python3.withPackages python-packages-devel;
 
-        pythonBuild = with local-python.pkgs;
+        # declare, how the python package shall be built
+        pythonBuild = with python-build.pkgs;
           buildPythonApplication {
             pname = "text_statistics";
             version = "1.0.3";
 
-            propagatedBuildInputs = with local-python.pkgs; [
-              pyphen
-              nltk
-              cherrypy
-              trafilatura
-            ];
+            propagatedBuildInputs = (python-packages-devel python-build.pkgs);
 
             src = ./.;
           };
 
+        # declare, how the docker image shall be built
         dockerImage = pkgs.dockerTools.buildImage {
           name = pythonBuild.pname;
           tag = pythonBuild.version;
@@ -172,7 +173,7 @@
         defaultPackage = pythonBuild;
         devShell = pkgs.mkShell {
           buildInputs = [
-            local-python
+            python-devel
             # python language server
             pkgs.nodePackages.pyright
           ];
