@@ -137,7 +137,7 @@
             pname = "text_statistics";
             version = "1.0.3";
 
-            propagatedBuildInputs = (python-packages-devel python-build.pkgs);
+            propagatedBuildInputs = (python-packages-build python-build.pkgs);
 
             src = ./.;
           };
@@ -151,7 +151,7 @@
             Cmd = [
               "${pkgs.bash}/bin/sh"
               (pkgs.writeShellScript "runDocker.sh" ''
-                ${pkgs.unzip}/bin/unzip /nltk_data/tokenizers/punkt.zip -d /nltk_data/tokenizers &
+                ${pkgs.unzip}/bin/unzip /nltk_data/tokenizers/punkt.zip -d /nltk_data/tokenizers;
                 /bin/text_statistics
               '')
             ];
