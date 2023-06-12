@@ -1,6 +1,6 @@
 #+title: Simple Text Reading Length Estimator
 
-The ~Python~ script [[file:.src/text_statistics/text_statistics.py]] estimates the reading time of a given text, using the following model:
+The ~Python~ script [[file:src/text_statistics/stats.py]] estimates the reading time of a given text, using the following model:
 - It assumes a base-line reading speed of 200 WPM.
 - This reading speed is adjusted w.r.t. the Flesch-Reading-Ease of the given text.
 
