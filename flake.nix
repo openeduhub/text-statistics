@@ -119,7 +119,7 @@
             cherrypy
             trafilatura
           ];
-        
+
         python-packages-devel = python-packages:
           with python-packages; [
             black
@@ -127,50 +127,55 @@
             isort
             ipython
           ] ++ (python-packages-build python-packages);
-        
+
         python-build = pkgs.python3.withPackages python-packages-build;
         python-devel = pkgs.python3.withPackages python-packages-devel;
 
-        # declare, how the python package shall be built
-        pythonBuild = with python-build.pkgs;
-          buildPythonPackage {
-            pname = "text_statistics";
-            version = "1.0.3";
+        # declare how the python package shall be built
+        text_statistics = python-build.pkgs.buildPythonPackage {
+          pname = "text_statistics";
+          version = "1.0.3";
 
-            propagatedBuildInputs = (python-packages-build python-build.pkgs);
+          propagatedBuildInputs = (python-packages-build python-build.pkgs);
 
-            src = ./.;
-          };
+          src = ./.;
+        };
 
-        # declare, how the docker image shall be built
+        # download nltk-punkt, an external requirement for nltk
+        nltk-punkt = pkgs.fetchurl {
+          url = "https://github.com/nltk/nltk_data/raw/5db857e6f7df11eabb5e5665836db9ec8df07e28/packages/tokenizers/punkt.zip";
+          sha256 = "sha256-UcMHiZSur2UL/I4Ci+T7QrSg0XfUHAErapg5eWU2YOw=";
+        };
+
+        # declare how the docker image shall be built
         dockerImage = pkgs.dockerTools.buildImage {
-          name = pythonBuild.pname;
-          tag = pythonBuild.version;
+          name = text_statistics.pname;
+          tag = text_statistics.version;
 
           config = {
             Cmd = [
-              "${pkgs.bash}/bin/sh"
-              (pkgs.writeShellScript "runDocker.sh" ''
-                ${pkgs.unzip}/bin/unzip /nltk_data/tokenizers/punkt.zip -d /nltk_data/tokenizers;
-                /bin/text_statistics
-              '')
+              "${pkgs.bash}/bin/sh" (pkgs.writeShellScript "runDocker.sh"
+                ''${pkgs.coreutils}/bin/mkdir -p /nltk_data/tokenizers;
+                  ${pkgs.unzip}/bin/unzip ${nltk-punkt} -d /nltk_data/tokenizers;
+                  /bin/text_statistics
+                '')
             ];
             WorkingDir = "/";
           };
 
           copyToRoot = pkgs.buildEnv {
             name = "image-root";
-            paths = [ ./data pythonBuild ];
-            pathsToLink = [ "/" ];
+            paths = [ text_statistics ];
+            pathsToLink = [ "/bin" ];
           };
         };
 
       in {
         packages = {
-          pythonPackage = pythonBuild;
+          pythonPackage = text_statistics;
           docker = dockerImage;
         };
-        defaultPackage = pythonBuild;
+        defaultPackage = text_statistics;
         devShell = pkgs.mkShell {
           buildInputs = [
             python-devel
