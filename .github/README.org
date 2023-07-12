@@ -1,4 +1,6 @@
 #+title: GitHub Specific README
+#+EXPORT_EXCLUDE_TAGS: noexport
+
 
 The ~Python~ script [[file:../src/text_statistics/stats.py]] estimates the reading time of a given text, using the following model:
 - It assumes a base-line reading speed of 200 WPM.
@@ -10,6 +12,15 @@ We chose an exponential function for this purpose because of its monotonicity an
 Other, possibly more sophisticated models, are also possible and could be studied and implemented in the future.
 
 [[file:../src/text_statistics/main.py]] provides a microservice, see [[Usage]].
+
+* Utils :noexport:
+#+name: format-result
+#+begin_src sh :var result="" :results verbatim
+echo $result | json
+#+end_src
+
+#+RESULTS: format-result
+: 1
 
 * Installation
 ** As Python Package
@@ -38,10 +49,9 @@ docker run -p 8080:8080 text_statistics:1.0.3
 * Usage
 Once the microservice is running, text can be supplied through ~json~ queries on the =analyze-text= subdomain.
 For example:
-#+begin_src sh :results verbatim :exports both
-curl -d '{"text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is another sentence."}' -H "Content-Type: application/json" -X POST localhost:8080/analyze-text | json
+#+begin_src bash :results verbatim :exports both :post format-result(result=*this*)
+curl -d '{"text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is another sentence."}' -H "Content-Type: application/json" -X POST localhost:8080/analyze-text
 #+end_src
-
 #+RESULTS:
 : {
 :   "flesch-ease": 43.39452054794519,
@@ -51,14 +61,13 @@ curl -d '{"text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
 : }
 
 As an alternative to providing the text to be processed directly, it is also possible to give the service a URL, which will then be crawled for content to analyze. Note that this does not work on Websites that heavily rely on ~JavaScript~.
-#+begin_src sh :results verbatim :exports both
-curl -d '{"url": "https://de.wikipedia.org/wiki/Deutschland"}' -H "Content-Type: application/json" -X POST localhost:8080/analyze-text | json
+#+begin_src sh :results verbatim :exports both :post format-result(result=*this*)
+curl -d '{"url": "https://de.wikipedia.org/wiki/Deutschland"}' -H "Content-Type: application/json" -X POST localhost:8080/analyze-text
 #+end_src
-
 #+RESULTS:
 : {
-:   "flesch-ease": 36.20501491952905,
+:   "flesch-ease": 36.24056913278366,
 :   "classification": "Schwer",
-:   "reading-time": 11937.790794813647,
-:   "text": <long text>
+:   "reading-time": 11956.36016867755,
+:   "text": "<long text>"
 : }
