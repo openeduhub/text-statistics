@@ -63,7 +63,7 @@
           name = python-app.pname;
           tag = python-app.version;
           config = {
-            Cmd = [ "${python-app}/bin/webservice" ];
+            Cmd = [ "${python-app}/bin/text-statistics" ];
           };
           copyToRoot = pkgs.buildEnv {
             name = "image-root";

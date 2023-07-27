@@ -12,5 +12,7 @@ setup(
         d for d in open("requirements.txt").readlines() if not d.startswith("--")
     ],
     package_dir={"": "src"},
-    entry_points={"console_scripts": ["webservice = text_statistics.webservice:main"]},
+    entry_points={
+        "console_scripts": ["text-statistics = text_statistics.webservice:main"]
+    },
 )
