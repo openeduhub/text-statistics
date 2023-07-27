@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "text-statistics"
+version = "0.1.0"
+description = "Compute various statistics from natural language texts."
+authors = ["joopitz <jonas.opitz@live.de>"]
+readme = "README.org"
+packages = [{include = "text_statistics"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyphen = "^0.14.0"
+nltk = "^3.8.1"
+CherryPy = "^18.8.0"
+trafilatura = "^1.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
