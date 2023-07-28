@@ -4,6 +4,7 @@ import cherrypy
 import text_statistics.stats as stats
 from text_statistics.grab_content import grab_content
 import pyphen
+import argparse
 
 
 class WebService:
@@ -11,6 +12,10 @@ class WebService:
 
     def __init__(self, pyphen_dic):
         self.dic = pyphen_dic
+
+    @cherrypy.expose
+    def _ping(self):
+        pass
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -58,9 +63,29 @@ class WebService:
 
 
 def main():
-    # listen to requests from any incoming IP address
-    cherrypy.server.socket_host = "0.0.0.0"
-    cherrypy.quickstart(WebService(pyphen_dic=pyphen.Pyphen(lang="de_DE")))
+    # define CLI arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--port", action="store", default=8080, help="Port to listen on", type=int
+    )
+    parser.add_argument(
+        "--host", action="store", default="0.0.0.0", help="Hosts to listen on", type=str
+    )
+    parser.add_argument(
+        "--lang",
+        action="store",
+        default="de_DE",
+        help="The language of the input text",
+        type=str,
+    )
+
+    # read passed CLI arguments
+    args = parser.parse_args()
+
+    # start the cherrypy service using the passed arguments
+    cherrypy.server.socket_host = args.host
+    cherrypy.server.socket_port = args.port
+    cherrypy.quickstart(WebService(pyphen_dic=pyphen.Pyphen(lang=args.lang)))
 
 
 if __name__ == "__main__":
