@@ -7,6 +7,9 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
+    {
+      overlays.default = (final: prev: { inherit (self.packages.${final.system}) text-statistics; });
+    } //
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {inherit system;};
