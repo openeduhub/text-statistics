@@ -35,15 +35,15 @@ Alternatively, with [[https://nixos.org/][nix]] installed (and the [[https://nix
 nix run github:openeduhub/text-statistics
 #+end_src
 
-** As Docker Image
-A docker image can be built through
+** As OCI Image
+An OCI / Docker image can be built through
 #+begin_src sh
 nix build github:openeduhub/text-statistics#docker
 #+end_src
 The resulting image has to be loaded and executed via
 #+begin_src sh
 docker load < /path/to/result
-docker run -p 8080:8080 text_statistics:1.0.3
+docker run -p 8080:8080 text_statistics:<version number>
 #+end_src
 
 * Usage
@@ -54,10 +54,11 @@ curl -d '{"text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
 #+end_src
 #+RESULTS:
 : {
-:   "flesch-ease": 43.39452054794519,
+:   "flesh-ease": 43.39452054794519,
 :   "classification": "Schwer",
 :   "reading-time": 29.987166756508653,
-:   "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is another sentence."
+:   "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is another sentence.",
+:   "version": "1.0.4"
 : }
 
 As an alternative to providing the text to be processed directly, it is also possible to give the service a URL, which will then be crawled for content to analyze. Note that this does not work on Websites that heavily rely on ~JavaScript~.
@@ -66,8 +67,9 @@ curl -d '{"url": "https://de.wikipedia.org/wiki/Deutschland"}' -H "Content-Type:
 #+end_src
 #+RESULTS:
 : {
-:   "flesch-ease": 36.24056913278366,
+:   "flesh-ease": 36.243777840225874,
 :   "classification": "Schwer",
-:   "reading-time": 11956.36016867755,
-:   "text": "<long text>"
+:   "reading-time": 11988.062021161655,
+:   "text": "<long text>",
+:   "version": "1.0.4"
 : }
