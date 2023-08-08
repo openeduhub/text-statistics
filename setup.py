@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from setuptools import setup
+from src.text_statistics._version import __version__
 
 setup(
-    name="text_statistics",
-    version="1.0",
-    description="Compute the Expected Reading Time of Text",
+    name="text-statistics",
+    version=__version__,
+    description="Compute various statistics on text, like readability or reading time",
     author="Jonas Opitz",
     author_email="jonas.opitz@gwdg.de",
     packages=["text_statistics"],
@@ -12,5 +13,7 @@ setup(
         d for d in open("requirements.txt").readlines() if not d.startswith("--")
     ],
     package_dir={"": "src"},
-    entry_points={"console_scripts": ["text_statistics = text_statistics.main:main"]},
+    entry_points={
+        "console_scripts": ["text-statistics = text_statistics.webservice:main"]
+    },
 )

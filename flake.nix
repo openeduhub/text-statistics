@@ -2,17 +2,24 @@
   description = "Basic Python Environment";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    flake-utils = { url = "github:numtide/flake-utils"; };
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = { self, nixpkgs, flake-utils }:
+    {
+      # define an overlay to add text-statistics to nixpkgs
+      overlays.default = (final: prev: {
+        inherit (self.packages.${final.system}) text-statistics;
+      });
+    } //
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {inherit system;};
+        python = pkgs.python310;
 
-        # build required packages from pypi
-        charset-normalizer = with pkgs.python3Packages;
+        ### build required packages from pypi
+        charset-normalizer = with python.pkgs;
           buildPythonPackage rec {
             pname = "charset-normalizer";
             version = "3.1.0";
@@ -25,7 +32,7 @@
             ];
           };
 
-        htmldate = with pkgs.python3Packages;
+        htmldate = with python.pkgs;
           buildPythonPackage rec {
             pname = "htmldate";
             version = "1.4.3";
@@ -42,7 +49,7 @@
             ];
           };
 
-        justext = with pkgs.python3Packages;
+        justext = with python.pkgs;
           buildPythonPackage rec {
             pname = "jusText";
             version = "3.0.0";
@@ -56,7 +63,7 @@
             ];
           };
 
-        courlan = with pkgs.python3Packages;
+        courlan = with python.pkgs;
           buildPythonPackage rec {
             pname = "courlan";
             version = "0.9.2";
@@ -72,7 +79,7 @@
             ];
           };
 
-        py3langid = with pkgs.python3Packages;
+        py3langid = with python.pkgs;
           buildPythonPackage rec {
             pname = "py3langid";
             version = "0.2.2";
@@ -86,7 +93,7 @@
             ];
           };
 
-        trafilatura = with pkgs.python3Packages;
+        trafilatura = with python.pkgs;
           buildPythonPackage rec {
             pname = "trafilatura";
             version = "1.5.0";
@@ -113,72 +120,64 @@
 
         # declare the python packages used for building & developing
         python-packages-build = python-packages:
-          with python-packages; [
-            pyphen
-            nltk
-            cherrypy
-            trafilatura
-          ];
+          with python-packages; [ pyphen
+                                  nltk
+                                  cherrypy
+                                  trafilatura
+                                ];
 
         python-packages-devel = python-packages:
-          with python-packages; [
-            black
-            pyflakes
-            isort
-            ipython
-          ] ++ (python-packages-build python-packages);
-
-        python-build = pkgs.python3.withPackages python-packages-build;
-        python-devel = pkgs.python3.withPackages python-packages-devel;
+          with python-packages; [ black
+                                  pyflakes
+                                  isort
+                                  ipython
+                                ]
+          ++ (python-packages-build python-packages);
+        
+        # download nltk-punkt, an external requirement for nltk
+        nltk-punkt = pkgs.fetchzip {
+          url = "https://github.com/nltk/nltk_data/raw/5db857e6f7df11eabb5e5665836db9ec8df07e28/packages/tokenizers/punkt.zip";
+          hash = "sha256-SKZu26K17qMUg7iCFZey0GTECUZ+sTTrF/pqeEgJCos=";
+        };
 
         # declare how the python package shall be built
-        text_statistics = python-build.pkgs.buildPythonPackage {
-          pname = "text_statistics";
-          version = "1.0.3";
-
-          propagatedBuildInputs = (python-packages-build python-build.pkgs);
-
-          src = ./.;
+        python-package = python.pkgs.buildPythonPackage rec {
+          pname = "text-statistics";
+          version = "1.0.4";
+          src = self;
+          propagatedBuildInputs = (python-packages-build python.pkgs);
+          # put nltk-punkt into a directory
+          preBuild = ''
+            mkdir -p $out/lib/nltk_data/tokenizers/punkt
+            cp -r ${nltk-punkt.out}/* $out/lib/nltk_data/tokenizers/punkt
+          '';
+          # make the created folder discoverable for NLTK
+          makeWrapperArgs = ["--set NLTK_DATA $out/lib/nltk_data"];
         };
 
-        # download nltk-punkt, an external requirement for nltk
-        nltk-punkt = pkgs.fetchurl {
-          url = "https://github.com/nltk/nltk_data/raw/5db857e6f7df11eabb5e5665836db9ec8df07e28/packages/tokenizers/punkt.zip";
-          sha256 = "sha256-UcMHiZSur2UL/I4Ci+T7QrSg0XfUHAErapg5eWU2YOw=";
-        };
+        # convert the package built above to an application
+        # a python application is essentially identical to a python package,
+        # but without the importable modules. as a result, it is smaller.
+        python-app = python.pkgs.toPythonApplication python-package;
 
         # declare how the docker image shall be built
-        dockerImage = pkgs.dockerTools.buildImage {
-          name = text_statistics.pname;
-          tag = text_statistics.version;
-
+        docker-img = pkgs.dockerTools.buildImage rec {
+          name = python-app.pname;
+          tag = python-app.version;
           config = {
-            Cmd = [
-              "${pkgs.bash}/bin/sh" (pkgs.writeShellScript "runDocker.sh"
-                ''${pkgs.coreutils}/bin/mkdir -p /nltk_data/tokenizers;
-                  ${pkgs.unzip}/bin/unzip ${nltk-punkt} -d /nltk_data/tokenizers;
-                  /bin/text_statistics
-                '')
-            ];
-            WorkingDir = "/";
-          };
-
-          copyToRoot = pkgs.buildEnv {
-            name = "image-root";
-            paths = [ text_statistics ];
-            pathsToLink = [ "/bin" ];
+            Cmd = [ "${python-app}/bin/text-statistics" ];
           };
         };
 
       in {
-        packages = {
-          pythonPackage = text_statistics;
-          docker = dockerImage;
+        packages = rec {
+          text-statistics = python-app;
+          docker = docker-img;
+          default = text-statistics;
         };
-        defaultPackage = text_statistics;
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           buildInputs = [
-            python-devel
+            (python-packages-devel python.pkgs)
             # python language server
             pkgs.nodePackages.pyright
           ];
