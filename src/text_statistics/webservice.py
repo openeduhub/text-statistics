@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
-import cherrypy
-import text_statistics.stats as stats
-from text_statistics.grab_content import grab_content
-import pyphen
 import argparse
+
+import cherrypy
+import pyphen
+
+import text_statistics.stats as stats
+from text_statistics._version import __version__
+from text_statistics.grab_content import grab_content
 
 
 class WebService:
@@ -59,6 +62,7 @@ class WebService:
             "classification": classification,
             "reading-time": reading_time * 60,
             "text": text,
+            "version": __version__,
         }
 
 
@@ -77,6 +81,12 @@ def main():
         default="de_DE",
         help="The language of the input text",
         type=str,
+    )
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s {version}".format(version=__version__),
     )
 
     # read passed CLI arguments

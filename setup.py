@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 from setuptools import setup
+from src.text_statistics._version import __version__
 
 setup(
     name="text-statistics",
-    version="1.0.4",
+    version=__version__,
     description="Compute various statistics on text, like readability or reading time",
     author="Jonas Opitz",
     author_email="jonas.opitz@gwdg.de",
