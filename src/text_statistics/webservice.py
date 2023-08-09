@@ -29,6 +29,11 @@ class Result(BaseModel):
     version: str = __version__
 
 
+@app.get("/_ping")
+def _ping():
+    pass
+
+
 def get_service(pyphen_dic):
     async def fun(data: Data) -> Result:
         """
