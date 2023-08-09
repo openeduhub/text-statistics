@@ -4,10 +4,20 @@ import argparse
 import math
 import string
 from collections.abc import Callable
-from typing import Optional
+from typing import Literal, Optional
 
 import nltk
 import pyphen
+
+Classification = Literal[
+    "Sehr leicht",
+    "Leicht",
+    "Mittelleicht",
+    "Mittel",
+    "Mittelschwer",
+    "Schwer",
+    "Sehr schwer",
+]
 
 
 def calculate_flesch_ease(text: str, pyphen_dic) -> float:
@@ -34,7 +44,7 @@ def calculate_flesch_ease(text: str, pyphen_dic) -> float:
     return 180 - average_sentence_length - (58.5 * average_hyphenation_length)
 
 
-def classify_from_flesch_ease(score: float) -> str:
+def classify_from_flesch_ease(score: float) -> Classification:
     if score <= 30:
         return "Sehr schwer"
     if score <= 50:

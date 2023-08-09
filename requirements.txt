@@ -1,4 +1,6 @@
 pyphen
 nltk
-cherrypy
+pydantic
+fastapi
+uvicorn
 trafilatura
