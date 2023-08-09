@@ -1,69 +1,76 @@
 #!/usr/bin/env python3
 
 import argparse
+from typing import Literal, Optional
 
-import cherrypy
 import pyphen
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 import text_statistics.stats as stats
 from text_statistics._version import __version__
 from text_statistics.grab_content import grab_content
 
+app = FastAPI()
 
-class WebService:
-    """A simple micro-service that calculates statistics on given texts"""
 
-    def __init__(self, pyphen_dic):
-        self.dic = pyphen_dic
+class Data(BaseModel):
+    text: Optional[str] = None
+    url: Optional[str] = None
+    reading_speed: float = 200.0
 
-    @cherrypy.expose
-    def _ping(self):
-        pass
 
-    @cherrypy.expose
-    @cherrypy.tools.json_in()
-    @cherrypy.tools.json_out()
-    def analyze_text(self):
+class Result(BaseModel):
+    flesh_ease: float
+    classification: stats.Classification
+    reading_time: float
+    text: str
+    version: str = __version__
+
+
+def get_service(pyphen_dic):
+    async def fun(data: Data) -> Result:
+        """
+        Compute various statistical properties on the given text or URL.
+        """
         # only support german language for now
         target_language = "de"
 
-        data = cherrypy.request.json
+        url, text, reading_speed = data.url, data.text, data.reading_speed
 
-        # if the text was given, use that
-        if "text" in data:
-            text = data["text"]
         # otherwise, crawl the text from the given url
-        elif "url" in data:
-            url = data["url"]
+        if url is not None:
             text = grab_content(
                 url, favor_precision=True, target_language=target_language
             )
             # no content could be grabbed
             if text is None:
-                return None
+                raise HTTPException(status_code=500, detail="URL could not be parsed")
         # one of text or url has to be given
-        else:
-            return None
+        elif text is None:
+            raise HTTPException(
+                status_code=400, detail="One of text or URL has to be given."
+            )
 
-        reading_speed = data.get("reading_speed", 200.0)
-
-        score = stats.calculate_flesch_ease(text, pyphen_dic=self.dic)
+        score = stats.calculate_flesch_ease(text, pyphen_dic=pyphen_dic)
         classification = stats.classify_from_flesch_ease(score)
         reading_time = stats.predict_reading_time(
             text=text,
             func=stats.initial_adjust_func,
-            dic=self.dic,
+            dic=pyphen_dic,
             reading_speed=reading_speed,
             score=score,
         )
 
-        return {
-            "flesh-ease": score,
-            "classification": classification,
-            "reading-time": reading_time * 60,
-            "text": text,
-            "version": __version__,
-        }
+        return Result(
+            flesh_ease=score,
+            classification=classification,
+            reading_time=reading_time * 60,
+            text=text,
+        )
+
+    return fun
 
 
 def main():
@@ -92,10 +99,12 @@ def main():
     # read passed CLI arguments
     args = parser.parse_args()
 
-    # start the cherrypy service using the passed arguments
-    cherrypy.server.socket_host = args.host
-    cherrypy.server.socket_port = args.port
-    cherrypy.quickstart(WebService(pyphen_dic=pyphen.Pyphen(lang=args.lang)))
+    # create and run the web service
+    pyphen_dic = pyphen.Pyphen(lang=args.lang)
+    app.post("/analyze-text")(get_service(pyphen_dic))
+    uvicorn.run(
+        "text_statistics.webservice:app", host=args.host, port=args.port, reload=False
+    )
 
 
 if __name__ == "__main__":

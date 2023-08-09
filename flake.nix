@@ -122,8 +122,10 @@
         python-packages-build = python-packages:
           with python-packages; [ pyphen
                                   nltk
-                                  cherrypy
+                                  fastapi
+                                  pydantic
                                   trafilatura
+                                  uvicorn
                                 ];
 
         python-packages-devel = python-packages:
