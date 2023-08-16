@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-from typing import Literal, Optional
 
 import pyphen
 import uvicorn
@@ -10,14 +9,12 @@ from pydantic import BaseModel
 
 import text_statistics.stats as stats
 from text_statistics._version import __version__
-from text_statistics.grab_content import grab_content
 
 app = FastAPI()
 
 
 class Data(BaseModel):
-    text: Optional[str] = None
-    url: Optional[str] = None
+    text: str
     reading_speed: float = 200.0
 
 
@@ -25,7 +22,6 @@ class Result(BaseModel):
     flesh_ease: float
     classification: stats.Classification
     reading_time: float
-    text: str
     version: str = __version__
 
 
@@ -42,29 +38,13 @@ def get_service(pyphen_dic):
         # only support german language for now
         target_language = "de"
 
-        url, text, reading_speed = data.url, data.text, data.reading_speed
-
-        # otherwise, crawl the text from the given url
-        if url is not None:
-            text = grab_content(
-                url, favor_precision=True, target_language=target_language
-            )
-            # no content could be grabbed
-            if text is None:
-                raise HTTPException(status_code=500, detail="URL could not be parsed")
-        # one of text or url has to be given
-        elif text is None:
-            raise HTTPException(
-                status_code=400, detail="One of text or URL has to be given."
-            )
-
-        score = stats.calculate_flesch_ease(text, pyphen_dic=pyphen_dic)
+        score = stats.calculate_flesch_ease(data.text, pyphen_dic=pyphen_dic)
         classification = stats.classify_from_flesch_ease(score)
         reading_time = stats.predict_reading_time(
-            text=text,
+            text=data.text,
             func=stats.initial_adjust_func,
             dic=pyphen_dic,
-            reading_speed=reading_speed,
+            reading_speed=data.reading_speed,
             score=score,
         )
 
@@ -72,7 +52,6 @@ def get_service(pyphen_dic):
             flesh_ease=score,
             classification=classification,
             reading_time=reading_time * 60,
-            text=text,
         )
 
     return fun

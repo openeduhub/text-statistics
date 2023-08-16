@@ -3,4 +3,3 @@ nltk
 pydantic
 fastapi
 uvicorn
-trafilatura
