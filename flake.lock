@@ -100,6 +100,22 @@
         "type": "github"
       }
     },
+    "nltk-data": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1675306065,
+        "narHash": "sha256-RFywUkesoUL8tbiKLs6Pa+NpoEOq9eu1dP83n5XkNpY=",
+        "owner": "nltk",
+        "repo": "nltk_data",
+        "rev": "5db857e6f7df11eabb5e5665836db9ec8df07e28",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nltk",
+        "repo": "nltk_data",
+        "type": "github"
+      }
+    },
     "openapi-checks": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -125,6 +141,7 @@
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "nltk-data": "nltk-data",
         "openapi-checks": "openapi-checks"
       }
     },

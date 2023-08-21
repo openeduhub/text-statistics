@@ -6,6 +6,10 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     openapi-checks.url = "/home/yusu/work/ITsJointly/projects/openapi-checks";
+    nltk-data = {
+      url = "github:nltk/nltk_data";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, flake-utils, ... }:
@@ -39,11 +43,11 @@
                                 ]
           ++ (python-packages-build python-packages);
         
-        # download nltk-punkt, an external requirement for nltk
-        nltk-punkt = pkgs.fetchzip {
-          url = "https://github.com/nltk/nltk_data/raw/5db857e6f7df11eabb5e5665836db9ec8df07e28/packages/tokenizers/punkt.zip";
-          hash = "sha256-SKZu26K17qMUg7iCFZey0GTECUZ+sTTrF/pqeEgJCos=";
-        };
+        # unzip nltk-punkt, an external requirement for nltk
+        nltk-punkt = pkgs.runCommand "nltk-punkt" {} ''
+          mkdir $out
+          ${pkgs.unzip}/bin/unzip ${self.inputs.nltk-data}/packages/tokenizers/punkt.zip -d $out
+        '';
 
         # declare how the python package shall be built
         python-package = python.pkgs.buildPythonPackage rec {
@@ -53,8 +57,8 @@
           propagatedBuildInputs = (python-packages-build python.pkgs);
           # put nltk-punkt into a directory
           preBuild = ''
-            mkdir -p $out/lib/nltk_data/tokenizers/punkt
-            cp -r ${nltk-punkt.out}/* $out/lib/nltk_data/tokenizers/punkt
+            mkdir -p $out/lib/nltk_data/tokenizers
+            cp -r ${nltk-punkt.out}/* $out/lib/nltk_data/tokenizers
           '';
           # make the created folder discoverable for NLTK
           makeWrapperArgs = ["--set NLTK_DATA $out/lib/nltk_data"];
