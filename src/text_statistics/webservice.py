@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import json
 import argparse
+import json
 from typing import Any
 
 import pyphen

@@ -3,8 +3,8 @@
 import argparse
 import math
 import string
-from collections.abc import Callable
 from collections import defaultdict
+from collections.abc import Callable
 from typing import Literal, Optional
 
 import nltk
