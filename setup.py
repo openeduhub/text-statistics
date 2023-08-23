@@ -14,6 +14,9 @@ setup(
     ],
     package_dir={"": "src"},
     entry_points={
-        "console_scripts": ["text-statistics = text_statistics.webservice:main"]
+        "console_scripts": [
+            "text-statistics = text_statistics.webservice:main",
+            "openapi-schema = text_statistics.webservice:print_openapi_schema",
+        ]
     },
 )

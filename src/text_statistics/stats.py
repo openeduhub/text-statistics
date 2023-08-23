@@ -4,6 +4,7 @@ import argparse
 import math
 import string
 from collections.abc import Callable
+from collections import defaultdict
 from typing import Literal, Optional
 
 import nltk
@@ -42,6 +43,40 @@ def calculate_flesch_ease(text: str, pyphen_dic) -> float:
         len(hyphenation) for hyphenation in hyphenations
     ) / len(hyphenations)
     return 180 - average_sentence_length - (58.5 * average_hyphenation_length)
+
+
+def calculate_wiener_index(text: str, pyphen_dic) -> float:
+    # average sentence length
+    sentences = nltk.sent_tokenize(text)
+    words_by_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
+    average_sent_len = sum(len(words) for words in words_by_sentences) / len(
+        words_by_sentences
+    )
+
+    # words by number of syllables
+    words = [word for words in words_by_sentences for word in words]
+    hyphenations: list[list[str]] = [
+        pyphen_dic.inserted(word).split("-")
+        for word in words
+        if not word in string.punctuation
+    ]
+    num_by_num_syls = defaultdict(lambda: 0)
+    for hyphenation in hyphenations:
+        num_by_num_syls[len(hyphenation)] += 1
+    rate_many_syls = sum(
+        num_by_num_syls[i] for i in num_by_num_syls.keys() if i >= 3
+    ) / len(words)
+    rate_one_syl = num_by_num_syls[1] / len(words)
+
+    rate_long_words = sum(len(word) > 6 for word in words) / len(words)
+
+    return (
+        0.1935 * rate_many_syls * 100
+        + 0.1672 * average_sent_len
+        + 0.1297 * rate_long_words * 100
+        - 0.0327 * rate_one_syl * 100
+        - 0.875
+    )
 
 
 def classify_from_flesch_ease(score: float) -> Classification:

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+import json
 import argparse
+from typing import Any
 
 import pyphen
 import uvicorn
@@ -9,8 +11,6 @@ from pydantic import BaseModel
 
 import text_statistics.stats as stats
 from text_statistics._version import __version__
-
-app = FastAPI()
 
 
 class Data(BaseModel):
@@ -21,40 +21,85 @@ class Data(BaseModel):
 class Result(BaseModel):
     flesch_ease: float
     classification: stats.Classification
+    wiener_index: float
     reading_time: float
     version: str = __version__
 
 
-@app.get("/_ping")
-def _ping():
-    pass
+def create_app(lang: str) -> FastAPI:
+    pyphen_dic = pyphen.Pyphen(lang=lang)
 
+    app = FastAPI()
 
-def get_service(pyphen_dic):
-    async def fun(data: Data) -> Result:
+    ### basic ping end point
+    @app.get("/_ping")
+    def _ping():
+        pass
+
+    ### the primary end point for text statistics
+    # docs
+    summary = "Compute text statistics on the given text"
+    description = f"""
+    Note: Only German language is supported right now.
+    
+    Parameters
+    ----------
+    text : str
+        The text to be analyzed.
+    reading_speed : float, optional
+        The reading speed in characters per minute to use as a base-line.
+        Default: 200
+    
+    Returns
+    -------
+    flesch_ease : float
+        The readability score of the text,
+        according to the Flesch reading ease.
+    flesch_classification : str
+        Interpretation of the Flesch readability score,
+        from 'Sehr leicht' to 'Sehr schwer'.
+    wiener_index : float
+        The appropriate school grade of the text, based on its readability,
+        according to the Wiener index.
+    reading_time : float
+        The predicted time to read the text, in seconds.
+        This is adjusted for the readability of the text,
+        according to the following formula:
+        reading_speed / 2 * exp(log(4) * flesch_ease / 121.5).
+        Thus, reading speed is doubled at the maximum readability
+        (121.5) and halved at readability 0.
+    version : str
+        The version of the text statistics service.
+    """
+
+    # definition of the end point
+    @app.post("/analyze-text", summary=summary, description=description)
+    async def text_stats(data: Data) -> Result:
         """
         Compute various statistical properties on the given text or URL.
         """
         # only support german language for now
         target_language = "de"
 
-        score = stats.calculate_flesch_ease(data.text, pyphen_dic=pyphen_dic)
-        classification = stats.classify_from_flesch_ease(score)
+        flesch_ease = stats.calculate_flesch_ease(data.text, pyphen_dic=pyphen_dic)
+        wiener_index = stats.calculate_wiener_index(data.text, pyphen_dic=pyphen_dic)
+        classification = stats.classify_from_flesch_ease(flesch_ease)
         reading_time = stats.predict_reading_time(
             text=data.text,
             func=stats.initial_adjust_func,
             dic=pyphen_dic,
             reading_speed=data.reading_speed,
-            score=score,
+            score=flesch_ease,
         )
 
         return Result(
-            flesch_ease=score,
+            flesch_ease=flesch_ease,
+            wiener_index=wiener_index,
             classification=classification,
             reading_time=reading_time * 60,
         )
 
-    return fun
+    return app
 
 
 def main():
@@ -84,43 +129,12 @@ def main():
     args = parser.parse_args()
 
     # create and run the web service
-    pyphen_dic = pyphen.Pyphen(lang=args.lang)
-    summary = "Compute text statistics on the given text"
-    app.post(
-        "/analyze-text",
-        summary=summary,
-        description=f"""
-        {summary}
+    app = create_app(lang=args.lang)
+    uvicorn.run(app, host=args.host, port=args.port, reload=False)
 
-        Parameters
-        ----------
-        text : str
-            The text to be analyzed.
-        reading_speed : float, optional
-            The reading speed in characters per minute to use as a base-line.
-            Set to 200 by default.
 
-        Returns
-        -------
-        flesch_ease : float
-            The readability score of the text,
-            calculated according to the Flesch reading ease.
-        classification : str
-            Interpretation of the readability score,
-            from 'Sehr leicht' to 'Sehr schwer'.
-        reading_time : float
-            The predicted time to read the text, in seconds.
-            This is adjusted for the readability of the text, using
-            reading_speed / 2 * exp(log(4) / 121.5 * flesch_ease).
-            Thus, reading speed is doubled at the maximum readability
-            (121.5) and halved at readability 0.
-        version : str
-            The version of the text statistics service.
-        """,
-    )(get_service(pyphen_dic))
-    uvicorn.run(
-        "text_statistics.webservice:app", host=args.host, port=args.port, reload=False
-    )
+def print_openapi_schema():
+    print(json.dumps(create_app(lang="de_DE").openapi()))
 
 
 if __name__ == "__main__":
