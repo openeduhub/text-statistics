@@ -19,34 +19,31 @@
       overlays.default = (final: prev: {
         inherit (self.packages.${final.system}) text-statistics;
       });
-    } //
-    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (system:
+    } // flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (system:
       let
-        pkgs = import nixpkgs {inherit system;};
-        pkgs-unstable = import nixpkgs-unstable {inherit system;};
+        pkgs = import nixpkgs { inherit system; };
+        pkgs-unstable = import nixpkgs-unstable { inherit system; };
         nix-filter = self.inputs.nix-filter.lib;
         openapi-checks = self.inputs.openapi-checks.lib.${system};
         python = pkgs.python310;
 
         # declare the python packages used for building & developing
         python-packages-build = python-packages:
-          with python-packages; [ pyphen
-                                  nltk
-                                  fastapi
-                                  pydantic
-                                  uvicorn
-                                ];
+          with python-packages; [
+            pyphen
+            nltk
+            fastapi
+            pydantic
+            uvicorn
+          ];
 
         python-packages-devel = python-packages:
-          with python-packages; [ black
-                                  pyflakes
-                                  isort
-                                  ipython
-                                ]
+          with python-packages;
+          [ black pyflakes isort ipython ]
           ++ (python-packages-build python-packages);
-        
+
         # unzip nltk-punkt, an external requirement for nltk
-        nltk-punkt = pkgs.runCommand "nltk-punkt" {} ''
+        nltk-punkt = pkgs.runCommand "nltk-punkt" { } ''
           mkdir $out
           ${pkgs.unzip}/bin/unzip ${self.inputs.nltk-data}/packages/tokenizers/punkt.zip -d $out
         '';
@@ -57,11 +54,7 @@
           version = "1.0.4";
           src = nix-filter {
             root = self;
-            include = [
-              "src"
-              ./setup.py
-              ./requirements.txt
-            ];
+            include = [ "src" ./setup.py ./requirements.txt ];
             exclude = [ (nix-filter.matchExt "pyc") ];
           };
           propagatedBuildInputs = (python-packages-build python.pkgs);
@@ -71,7 +64,7 @@
             cp -r ${nltk-punkt.out}/* $out/lib/nltk_data/tokenizers
           '';
           # make the created folder discoverable for NLTK
-          makeWrapperArgs = ["--set NLTK_DATA $out/lib/nltk_data"];
+          makeWrapperArgs = [ "--set NLTK_DATA $out/lib/nltk_data" ];
         };
 
         # convert the package built above to an application
@@ -86,10 +79,7 @@
             root = self;
             include = [ ./src/text_statistics/webservice.py ];
           };
-          nativeBuildInputs = [
-            pkgs.makeWrapper
-            python-app
-          ];
+          nativeBuildInputs = [ pkgs.makeWrapper python-app ];
           installPhase = ''
             mkdir $out
             ${python-app}/bin/openapi-schema | ${pkgs.nodePackages.json}/bin/json > $out/schema.json
@@ -100,9 +90,7 @@
         docker-img = pkgs.dockerTools.buildImage rec {
           name = python-app.pname;
           tag = python-app.version;
-          config = {
-            Cmd = [ "${python-app}/bin/text-statistics" ];
-          };
+          config = { Cmd = [ "${python-app}/bin/text-statistics" ]; };
         };
 
       in {
@@ -120,12 +108,9 @@
           ];
         };
         checks = {
-          openapi-check = (
-            openapi-checks.test-file {
-              openapiFile = "${openapi-schema}/schema.json";
-            }
-          );
+          openapi-check = (openapi-checks.test-file {
+            openapiFile = "${openapi-schema}/schema.json";
+          });
         };
-      }
-    );
+      });
 }
