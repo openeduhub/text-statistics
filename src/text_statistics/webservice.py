@@ -7,22 +7,22 @@ from typing import Any
 import pyphen
 import uvicorn
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import text_statistics.stats as stats
 from text_statistics._version import __version__
 
 
 class Data(BaseModel):
-    text: str
-    reading_speed: float = 200.0
+    text: str = Field(min_length=1)
+    reading_speed: float = Field(default=200.0, ge=1.0)
 
 
 class Result(BaseModel):
-    flesch_ease: float
-    classification: stats.Classification
-    wiener_index: float
-    reading_time: float
+    flesch_ease: float | None
+    classification: stats.Classification | None
+    wiener_index: float | None
+    reading_time: float | None
     version: str = __version__
 
 
@@ -52,22 +52,26 @@ def create_app(lang: str) -> FastAPI:
     
     Returns
     -------
-    flesch_ease : float
+    flesch_ease : float or null
         The readability score of the text,
         according to the Flesch reading ease.
-    flesch_classification : str
+        null if undefined (i.e. text is empty).
+    flesch_classification : str or null
         Interpretation of the Flesch readability score,
         from 'Sehr leicht' to 'Sehr schwer'.
-    wiener_index : float
+        null if undefined (i.e. text is empty).
+    wiener_index : float or null
         The appropriate school grade of the text, based on its readability,
         according to the Wiener index.
-    reading_time : float
+        null if undefined (i.e. text is empty).
+    reading_time : float or null
         The predicted time to read the text, in seconds.
         This is adjusted for the readability of the text,
         according to the following formula:
         reading_speed / 2 * exp(log(4) * flesch_ease / 121.5).
         Thus, reading speed is doubled at the maximum readability
         (121.5) and halved at readability 0.
+        null if undefined (i.e. text is empty).
     version : str
         The version of the text statistics service.
     """
@@ -81,9 +85,20 @@ def create_app(lang: str) -> FastAPI:
         # only support german language for now
         target_language = "de"
 
-        flesch_ease = stats.calculate_flesch_ease(data.text, pyphen_dic=pyphen_dic)
+        try:
+            flesch_ease = stats.calculate_flesch_ease(data.text, pyphen_dic=pyphen_dic)
+        except ZeroDivisionError:
+            return Result(
+                flesch_ease=None,
+                wiener_index=None,
+                classification=None,
+                reading_time=None,
+            )
+
         wiener_index = stats.calculate_wiener_index(data.text, pyphen_dic=pyphen_dic)
+
         classification = stats.classify_from_flesch_ease(flesch_ease)
+
         reading_time = stats.predict_reading_time(
             text=data.text,
             func=stats.initial_adjust_func,

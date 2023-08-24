@@ -26,6 +26,7 @@ def calculate_flesch_ease(text: str, pyphen_dic) -> float:
     # and sentences into words
     sentences = nltk.sent_tokenize(text)
     words_by_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
+
     average_sentence_length = sum(len(words) for words in words_by_sentences) / len(
         words_by_sentences
     )
