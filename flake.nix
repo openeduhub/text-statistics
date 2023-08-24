@@ -108,8 +108,9 @@
           ];
         };
         checks = {
-          openapi-check = (openapi-checks.test-file {
-            openapiFile = "${openapi-schema}/schema.json";
+          test-service = (openapi-checks.test-service {
+            serviceBin = "${python-app}/bin/text-statistics";
+            openapiDomain = "openapi.json";
           });
         };
       });
