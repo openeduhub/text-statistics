@@ -112,8 +112,9 @@
         };
         checks = {
           test-service = (openapi-checks.test-service {
-            serviceBin = "${python-app}/bin/text-statistics";
-            openapiDomain = "openapi.json";
+            service-bin = "${python-app}/bin/text-statistics";
+            service-port = 8080;
+            openapi-domain = "openapi.json";
           });
         };
       });
