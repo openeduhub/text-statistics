@@ -1,15 +1,13 @@
 #+title: GitHub Specific README
 #+EXPORT_EXCLUDE_TAGS: noexport
 
-
 The ~Python~ script [[file:../src/text_statistics/stats.py]] estimates the reading time of a given text, using the following model:
 - It assumes a base-line reading speed of 200 WPM.
 - This reading speed is adjusted w.r.t. the Flesch-Reading-Ease of the given text.
 
-In particular, we set that the "real" reading speed of the text is equal to $200 \cdot \left(\frac{1}{2} \exp(\ln(4) / 121.5 \cdot s)\right)$, where $s$ is the Flesch-Reading-Ease.
-Thus, the reading-speed is halved at a reading ease of $0$ (very difficult) and double at a reading ease of $121.5$ (the highest possible value).
-We chose an exponential function for this purpose because of its monotonicity and the fact that it is always above 0.
-Other, possibly more sophisticated models, are also possible and could be studied and implemented in the future.
+In particular, we set that the "real" reading speed of the text is equal to $200 \cdot \left(\frac{1}{2} \exp(\ln(4) / 121.5 \cdot s)\right)$, where $s$ is the Flesch-Reading-Ease. Thus, the reading-speed is halved at a reading ease of $0$ (very difficult) and double at a reading ease of $121.5$ (the highest possible value).
+
+We chose an exponential function for this purpose because of its monotonicity and the fact that it is always above 0. Other, possibly more sophisticated models, are also possible and could be studied and implemented in the future.
 
 [[file:../src/text_statistics/main.py]] provides a microservice, see [[Usage]].
 
@@ -29,6 +27,11 @@ This package can be installed as a Python package by cloning this repository and
 pip install .
 #+end_src
 
+Then, the microservice can be started through
+#+begin_src shell
+text-statistics
+#+end_src
+
 ** As Nix Flake
 Alternatively, with [[https://nixos.org/][nix]] installed (and the [[https://nixos.wiki/wiki/Flakes#Enable_flakes][flakes]] feature enabled), one can run the microservice through
 #+begin_src sh
@@ -40,10 +43,11 @@ An OCI / Docker image can be built through
 #+begin_src sh
 nix build github:openeduhub/text-statistics#docker
 #+end_src
-The resulting image has to be loaded and executed via
+
+The resulting image =result= is located in the current working directory. It can then be loaded and executed via
 #+begin_src sh
-docker load < /path/to/result
-docker run -p 8080:8080 text_statistics:<version number>
+docker load -i result
+docker run -p 8080:8080 text-statistics:<version number>
 #+end_src
 
 * Usage
@@ -57,25 +61,10 @@ curl -d '{"text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
 #+end_src
 #+RESULTS:
 : {
-:   "flesh_ease": 43.39452054794519,
+:   "flesch_ease": 43.39452054794519,
 :   "classification": "Schwer",
+:   "wiener_index": 10.051836097560974,
 :   "reading_time": 29.987166756508653,
-:   "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is another sentence.",
 :   "version": "1.0.4"
 : }
 
-As an alternative to providing the text to be processed directly, it is also possible to give the service a URL, which will then be crawled for content to analyze. Note that this does not work on Websites that heavily rely on ~JavaScript~.
-#+begin_src sh :results verbatim :exports both :post format-result(result=*this*)
-curl -d '{"url": "https://de.wikipedia.org/wiki/Deutschland"}' \
-     -H "Content-Type: application/json" \
-     -X POST \
-     localhost:8080/analyze-text
-#+end_src
-#+RESULTS:
-: {
-:   "flesh_ease": 36.243777840225874,
-:   "classification": "Schwer",
-:   "reading_time": 11988.062021161655,
-:   "text": "<long text>",
-:   "version": "1.0.4"
-: }
