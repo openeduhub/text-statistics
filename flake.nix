@@ -3,7 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     nix-filter.url = "github:numtide/nix-filter";
     openapi-checks.url = "github:openeduhub/nix-openapi-checks";
@@ -13,7 +12,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, flake-utils, ... }:
+  outputs = { self, nixpkgs, flake-utils, ... }:
     {
       # define an overlay to add text-statistics to nixpkgs
       overlays.default = (final: prev: {
@@ -22,7 +21,6 @@
     } // flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        pkgs-unstable = import nixpkgs-unstable { inherit system; };
         nix-filter = self.inputs.nix-filter.lib;
         openapi-checks = self.inputs.openapi-checks.lib.${system};
         python = pkgs.python310;
@@ -85,7 +83,9 @@
           nativeBuildInputs = [ pkgs.makeWrapper python-app ];
           installPhase = ''
             mkdir $out
-            ${python-app}/bin/openapi-schema | ${pkgs.nodePackages.json}/bin/json > $out/schema.json
+            ${python-app}/bin/openapi-schema \
+            | ${pkgs.nodePackages.json}/bin/json \
+            > $out/schema.json
           '';
         };
 
