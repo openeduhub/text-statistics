@@ -43,9 +43,13 @@
           ++ (python-packages-build python-packages);
 
         # unzip nltk-punkt, an external requirement for nltk
-        nltk-punkt = pkgs.runCommand "nltk-punkt" { } ''
-          mkdir $out
-          ${pkgs.unzip}/bin/unzip ${self.inputs.nltk-data}/packages/tokenizers/punkt.zip -d $out
+        nltk-punkt = pkgs.runCommand "nltk-punkt" {
+          outpath = "tokenizers";
+        } ''
+          mkdir -p $out/$outpath
+          ${pkgs.unzip}/bin/unzip \
+            ${self.inputs.nltk-data}/packages/tokenizers/punkt.zip \
+            -d $out/$outpath
         '';
 
         # declare how the python package shall be built
@@ -58,13 +62,12 @@
             exclude = [ (nix-filter.matchExt "pyc") ];
           };
           propagatedBuildInputs = (python-packages-build python.pkgs);
-          # put nltk-punkt into a directory
-          preBuild = ''
-            mkdir -p $out/lib/nltk_data/tokenizers
-            cp -r ${nltk-punkt.out}/* $out/lib/nltk_data/tokenizers
-          '';
-          # make the created folder discoverable for NLTK
-          makeWrapperArgs = [ "--set NLTK_DATA $out/lib/nltk_data" ];
+          # make nltk data discoverable during build
+          NLTK_DATA = nltk-punkt.out;
+          # make nltk data discoverable during runtime
+          makeWrapperArgs = [ "--set NLTK_DATA $NLTK_DATA" ];
+          # check that the package can be imported
+          pythonImportsCheck = [ "text_statistics" ];
         };
 
         # convert the package built above to an application
@@ -95,7 +98,7 @@
 
       in {
         packages = rec {
-          inherit openapi-schema;
+          inherit openapi-schema nltk-punkt;
           text-statistics = python-app;
           docker = docker-img;
           default = text-statistics;
