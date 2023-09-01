@@ -18,7 +18,7 @@
       overlays.default = (final: prev: {
         inherit (self.packages.${final.system}) text-statistics;
       });
-    } // flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (system:
+    } // flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
         nix-filter = self.inputs.nix-filter.lib;
@@ -41,14 +41,14 @@
           ++ (python-packages-build python-packages);
 
         # unzip nltk-punkt, an external requirement for nltk
-        nltk-punkt = pkgs.runCommand "nltk-punkt" {
-          outpath = "tokenizers";
-        } ''
-          mkdir -p $out/$outpath
-          ${pkgs.unzip}/bin/unzip \
-            ${self.inputs.nltk-data}/packages/tokenizers/punkt.zip \
-            -d $out/$outpath
-        '';
+        nltk-punkt = pkgs.runCommand "nltk-punkt"
+          { outpath = "tokenizers"; }
+          ''
+            mkdir -p $out/$outpath
+            ${pkgs.unzip}/bin/unzip \
+              ${self.inputs.nltk-data}/packages/tokenizers/punkt.zip \
+              -d $out/$outpath
+          '';
 
         # declare how the python package shall be built
         python-package = python.pkgs.buildPythonPackage rec {
@@ -73,6 +73,7 @@
         # but without the importable modules. as a result, it is smaller.
         python-app = python.pkgs.toPythonApplication python-package;
 
+        # export the openapi schema
         openapi-schema = pkgs.stdenv.mkDerivation {
           pname = "${python-app.pname}-openapi-schema";
           version = python-app.version;
@@ -96,13 +97,19 @@
           config = { Cmd = [ "${python-app}/bin/text-statistics" ]; };
         };
 
-      in {
-        packages = rec {
+      in
+      {
+        packages = {
           inherit openapi-schema nltk-punkt;
           text-statistics = python-app;
           docker = docker-img;
-          default = text-statistics;
-        };
+          default = python-app;
+        } // (nixpkgs.lib.optionalAttrs
+          # only build docker images on linux systems
+          (system == "x86_64-linux" || system == "aarch64-linux")
+          {
+            docker = docker-img;
+          });
         devShells.default = pkgs.mkShell {
           buildInputs = [
             (python.withPackages python-packages-devel)
@@ -110,12 +117,15 @@
             pkgs.nodePackages.pyright
           ];
         };
-        checks = {
-          test-service = (openapi-checks.test-service {
-            service-bin = "${python-app}/bin/text-statistics";
-            service-port = 8080;
-            openapi-domain = "openapi.json";
+        checks = { } // (nixpkgs.lib.optionalAttrs
+          # only run the VM checks on linux systems
+          (system == "x86_64-linux" || system == "aarch64-linux")
+          {
+            test-service = (openapi-checks.test-service {
+              service-bin = "${python-app}/bin/${python-app.pname}";
+              service-port = 8080;
+              openapi-domain = "openapi.json";
+            });
           });
-        };
       });
 }
