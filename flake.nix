@@ -124,7 +124,7 @@
             test-service = (openapi-checks.test-service {
               service-bin = "${python-app}/bin/${python-app.pname}";
               service-port = 8080;
-              openapi-domain = "openapi.json";
+              openapi-domain = "/openapi.json";
             });
           });
       });

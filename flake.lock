@@ -7,11 +7,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1693229244,
-        "narHash": "sha256-o3DBGPf1M6FjPxUUxyTRHT6EFPTFuLStTH8O8fx005o=",
+        "lastModified": 1695297091,
+        "narHash": "sha256-NVc7jHRfP981xlBJRlxAScbBEgOpm3edK3NmZ6QxMVM=",
         "owner": "openeduhub",
         "repo": "auto-openapi-tests",
-        "rev": "ac7fbd16a00638834ad7f565f34390f8d31a44ac",
+        "rev": "d6e0b9f452f1f9c48709d4a45b87a9e404c11f75",
         "type": "github"
       },
       "original": {
@@ -25,11 +25,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1692799911,
-        "narHash": "sha256-3eihraek4qL744EvQXsK1Ha6C3CR7nnT8X2qWap4RNk=",
+        "lastModified": 1701680307,
+        "narHash": "sha256-kAuep2h5ajznlPMD9rnQyffWG8EM/C73lejGofXvdM8=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "f9e7cf818399d17d347f847525c5a5a8032e4e44",
+        "rev": "4022d587cbbfd70fe950c1e2083a02621806a725",
         "type": "github"
       },
       "original": {
@@ -76,11 +76,11 @@
     },
     "nix-filter": {
       "locked": {
-        "lastModified": 1687178632,
-        "narHash": "sha256-HS7YR5erss0JCaUijPeyg2XrisEb959FIct3n2TMGbE=",
+        "lastModified": 1694857738,
+        "narHash": "sha256-bxxNyLHjhu0N8T3REINXQ2ZkJco0ABFPn6PIe2QUfqo=",
         "owner": "numtide",
         "repo": "nix-filter",
-        "rev": "d90c75e8319d0dd9be67d933d8eb9d0894ec9174",
+        "rev": "41fd48e00c22b4ced525af521ead8792402de0ea",
         "type": "github"
       },
       "original": {
@@ -106,11 +106,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1692794066,
-        "narHash": "sha256-H0aG8r16dj0x/Wz6wQhQxc9V7AsObOiHPaKxQgH6Y08=",
+        "lastModified": 1701540982,
+        "narHash": "sha256-5ajSy6ODgGmAbmymRdHnjfVnuVrACjI8wXoGVvrtvww=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "fc944919f743bb22379dddf18dcb72db6cff84aa",
+        "rev": "6386d8aafc28b3a7ed03880a57bdc6eb4465491d",
         "type": "github"
       },
       "original": {
@@ -192,11 +192,11 @@
         "nixpkgs-unstable": "nixpkgs-unstable"
       },
       "locked": {
-        "lastModified": 1693231533,
-        "narHash": "sha256-H2192MQN5yMnyaPhqtKBC2YEdQMAxfUtG5/43MG1Ts8=",
+        "lastModified": 1701332819,
+        "narHash": "sha256-c2X4FkjPrgqgyG26RJYWADKdroV6zeEMPQJaNA10BJ4=",
         "owner": "openeduhub",
         "repo": "nix-openapi-checks",
-        "rev": "40b0ebb7bc17ca81538e96a10704cabf3a99ca80",
+        "rev": "10e5853337d16eedadeb0660bce87aabbb94024b",
         "type": "github"
       },
       "original": {
