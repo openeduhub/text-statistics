@@ -2,7 +2,7 @@
   description = "Packaging for the text statistics service";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
     flake-utils.url = "github:numtide/flake-utils";
     nix-filter.url = "github:numtide/nix-filter";
     openapi-checks.url = "github:openeduhub/nix-openapi-checks";
@@ -66,6 +66,9 @@
           makeWrapperArgs = [ "--set NLTK_DATA $NLTK_DATA" ];
           # check that the package can be imported
           pythonImportsCheck = [ "text_statistics" ];
+          # the package does not have any tests
+          doCheck = false;
+          doInstallCheck = false;
         };
 
         # convert the package built above to an application
