@@ -23,7 +23,7 @@
         pkgs = import nixpkgs { inherit system; };
         nix-filter = self.inputs.nix-filter.lib;
         openapi-checks = self.inputs.openapi-checks.lib.${system};
-        python = pkgs.python310;
+        python = pkgs.python3;
 
         # declare the python packages used for building & developing
         python-packages-build = python-packages:
@@ -53,7 +53,7 @@
         # declare how the python package shall be built
         python-package = python.pkgs.buildPythonPackage rec {
           pname = "text-statistics";
-          version = "1.0.4";
+          version = "1.0.5";
           src = nix-filter {
             root = self;
             include = [ "src" ./setup.py ./requirements.txt ];
