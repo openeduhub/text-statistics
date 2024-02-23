@@ -7,8 +7,9 @@ from collections import defaultdict
 from collections.abc import Callable
 from typing import Literal, Optional
 
-import nltk
+import nlprep.spacy as nlp
 import pyphen
+from nlprep import tokenize_documents
 
 Classification = Literal[
     "Sehr leicht",
@@ -24,8 +25,10 @@ Classification = Literal[
 def calculate_flesch_ease(text: str, pyphen_dic) -> float:
     # fragment the given text into sentences,
     # and sentences into words
-    sentences = nltk.sent_tokenize(text)
-    words_by_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
+    doc = list(tokenize_documents([text], tokenize_fun=nlp.tokenize_as_words))[0]
+    words_by_sentences = nlp.into_sentences(doc)
+    # sentences = nltk.sent_tokenize(text)
+    # words_by_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
 
     average_sentence_length = sum(len(words) for words in words_by_sentences) / len(
         words_by_sentences
@@ -48,8 +51,9 @@ def calculate_flesch_ease(text: str, pyphen_dic) -> float:
 
 def calculate_wiener_index(text: str, pyphen_dic) -> float:
     # average sentence length
-    sentences = nltk.sent_tokenize(text)
-    words_by_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
+    doc = list(tokenize_documents([text], tokenize_fun=nlp.tokenize_as_words))[0]
+    words_by_sentences = nlp.into_sentences(doc)
+
     average_sent_len = sum(len(words) for words in words_by_sentences) / len(
         words_by_sentences
     )
@@ -108,7 +112,8 @@ def predict_reading_time(
     modifying it using the given function according to the Flesch-ease,
     and applying it to the number of words in the given text.
     """
-    num_words = len(nltk.word_tokenize(text))
+    doc = list(tokenize_documents([text], tokenize_fun=nlp.tokenize_as_words))[0]
+    num_words = len(doc)
     score = score if score else calculate_flesch_ease(text, dic)
     return num_words / func(reading_speed, score)
 
@@ -119,6 +124,11 @@ def initial_adjust_func(reading_speed: float, score: float) -> float:
     and reading speed
     """
     return reading_speed / 2 * math.exp(math.log(4) / 121.5 * score)
+
+
+def get_embeddings(text: str) -> list[list[float]]:
+    doc = list(tokenize_documents([text], tokenize_fun=nlp.tokenize_as_words))[0]
+    return [list(vector) for vector in nlp.get_word_vectors(doc)]
 
 
 def main():

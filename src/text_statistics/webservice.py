@@ -2,20 +2,20 @@
 
 import argparse
 import json
-from typing import Any
 
 import pyphen
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
 import text_statistics.stats as stats
 from text_statistics._version import __version__
 
 
-class Data(BaseModel):
+class InputData(BaseModel):
     text: str = Field(min_length=1)
     reading_speed: float = Field(default=200.0, ge=1.0)
+    generate_embeddings: bool = Field(default=False)
 
 
 class Result(BaseModel):
@@ -23,6 +23,7 @@ class Result(BaseModel):
     classification: stats.Classification | None
     wiener_index: float | None
     reading_time: float | None
+    embeddings: list[list[float]] | None
     version: str = __version__
 
 
@@ -49,6 +50,10 @@ def create_app(lang: str) -> FastAPI:
     reading_speed : float, optional
         The reading speed in characters per minute to use as a base-line.
         Default: 200
+    generate_embeddings : bool, optional
+        Whether to also generate a vectorized representation of the text using
+        word embeddings.
+        
     
     Returns
     -------
@@ -72,13 +77,16 @@ def create_app(lang: str) -> FastAPI:
         Thus, reading speed is doubled at the maximum readability
         (121.5) and halved at readability 0.
         null if undefined (i.e. text is empty).
+    embeddings : list[float] or null
+        If ``generate_embeddings`` was set to `True`, this will be the
+        vectorized representation of the text. Otherwise, `null`.
     version : str
         The version of the text statistics service.
     """
 
     # definition of the end point
     @app.post("/analyze-text", summary=summary, description=description)
-    async def text_stats(data: Data) -> Result:
+    async def text_stats(data: InputData) -> Result:
         """
         Compute various statistical properties on the given text or URL.
         """
@@ -93,6 +101,7 @@ def create_app(lang: str) -> FastAPI:
                 wiener_index=None,
                 classification=None,
                 reading_time=None,
+                embeddings=None,
             )
 
         wiener_index = stats.calculate_wiener_index(data.text, pyphen_dic=pyphen_dic)
@@ -107,11 +116,16 @@ def create_app(lang: str) -> FastAPI:
             score=flesch_ease,
         )
 
+        embeddings = None
+        if data.generate_embeddings:
+            embeddings = stats.get_embeddings(text=data.text)
+
         return Result(
             flesch_ease=flesch_ease,
             wiener_index=wiener_index,
             classification=classification,
             reading_time=reading_time * 60,
+            embeddings=embeddings,
         )
 
     return app

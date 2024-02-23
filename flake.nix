@@ -6,10 +6,7 @@
     flake-utils.url = "github:numtide/flake-utils";
     nix-filter.url = "github:numtide/nix-filter";
     openapi-checks.url = "github:openeduhub/nix-openapi-checks";
-    nltk-data = {
-      url = "github:nltk/nltk_data";
-      flake = false;
-    };
+    nlprep.url = "github:openeduhub/nlprep";
   };
 
   outputs = { self, nixpkgs, flake-utils, ... }:
@@ -29,10 +26,10 @@
         python-packages-build = python-packages:
           with python-packages; [
             pyphen
-            nltk
             fastapi
             pydantic
             uvicorn
+            (self.inputs.nlprep.lib.nlprep python-packages)
           ];
 
         python-packages-devel = python-packages:
@@ -40,30 +37,16 @@
           [ black pyflakes isort ipython ]
           ++ (python-packages-build python-packages);
 
-        # unzip nltk-punkt, an external requirement for nltk
-        nltk-punkt = pkgs.runCommand "nltk-punkt"
-          { outpath = "tokenizers"; }
-          ''
-            mkdir -p $out/$outpath
-            ${pkgs.unzip}/bin/unzip \
-              ${self.inputs.nltk-data}/packages/tokenizers/punkt.zip \
-              -d $out/$outpath
-          '';
-
         # declare how the python package shall be built
         python-package = python.pkgs.buildPythonPackage rec {
           pname = "text-statistics";
-          version = "1.0.5";
+          version = "1.1.0";
           src = nix-filter {
             root = self;
             include = [ "src" ./setup.py ./requirements.txt ];
             exclude = [ (nix-filter.matchExt "pyc") ];
           };
           propagatedBuildInputs = (python-packages-build python.pkgs);
-          # make nltk data discoverable during build
-          NLTK_DATA = nltk-punkt.out;
-          # make nltk data discoverable during runtime
-          makeWrapperArgs = [ "--set NLTK_DATA $NLTK_DATA" ];
           # check that the package can be imported
           pythonImportsCheck = [ "text_statistics" ];
           # the package does not have any tests
@@ -103,7 +86,7 @@
       in
       {
         packages = {
-          inherit openapi-schema nltk-punkt;
+          inherit openapi-schema;
           text-statistics = python-app;
           docker = docker-img;
           default = python-app;
@@ -128,6 +111,7 @@
               service-bin = "${python-app}/bin/${python-app.pname}";
               service-port = 8080;
               openapi-domain = "/openapi.json";
+              memory-size = 2 * 1024;
             });
           });
       });

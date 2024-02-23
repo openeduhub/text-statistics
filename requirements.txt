@@ -1,5 +1,5 @@
 pyphen
-nltk
 pydantic
 fastapi
 uvicorn
+nlprep
