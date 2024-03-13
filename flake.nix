@@ -10,54 +10,65 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, ... }:
+    let
+      nix-filter = self.inputs.nix-filter.lib;
+
+      # declare the python packages used for building & developing
+      python-packages-build = py-pkgs:
+        with py-pkgs; [
+          pyphen
+          fastapi
+          pydantic
+          uvicorn
+          (self.inputs.nlprep.lib.nlprep py-pkgs)
+        ];
+
+      python-packages-devel = py-pkgs:
+        with py-pkgs; [
+          black
+          pyflakes
+          isort
+          ipython
+        ]
+        ++ (python-packages-build py-pkgs);
+
+      # declare how the python package shall be built
+      get-python-package = py-pkgs: py-pkgs.buildPythonPackage rec {
+        pname = "text-statistics";
+        version = "1.1.0";
+        src = nix-filter {
+          root = self;
+          include = [ "src" ./setup.py ./requirements.txt ];
+          exclude = [ (nix-filter.matchExt "pyc") ];
+        };
+        propagatedBuildInputs = (python-packages-build py-pkgs);
+        # check that the package can be imported
+        pythonImportsCheck = [ "text_statistics" ];
+        # the package does not have any tests
+        doCheck = false;
+        doInstallCheck = false;
+      };
+
+      # convert the package built above to an application
+      # a python application is essentially identical to a python package,
+      # but without the importable modules. as a result, it is smaller.
+      get-python-app = py-pkgs: py-pkgs.toPythonApplication (get-python-package py-pkgs);
+    in
     {
       # define an overlay to add text-statistics to nixpkgs
       overlays.default = (final: prev: {
         inherit (self.packages.${final.system}) text-statistics;
       });
+      lib = {
+        text-statistics = get-python-package;
+      };
     } // flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs { inherit system; };
-        nix-filter = self.inputs.nix-filter.lib;
+        # a specific build for a specific system
+        pkgs = nixpkgs.legacyPackages.${system};
         openapi-checks = self.inputs.openapi-checks.lib.${system};
         python = pkgs.python3;
-
-        # declare the python packages used for building & developing
-        python-packages-build = python-packages:
-          with python-packages; [
-            pyphen
-            fastapi
-            pydantic
-            uvicorn
-            (self.inputs.nlprep.lib.nlprep python-packages)
-          ];
-
-        python-packages-devel = python-packages:
-          with python-packages;
-          [ black pyflakes isort ipython ]
-          ++ (python-packages-build python-packages);
-
-        # declare how the python package shall be built
-        python-package = python.pkgs.buildPythonPackage rec {
-          pname = "text-statistics";
-          version = "1.1.0";
-          src = nix-filter {
-            root = self;
-            include = [ "src" ./setup.py ./requirements.txt ];
-            exclude = [ (nix-filter.matchExt "pyc") ];
-          };
-          propagatedBuildInputs = (python-packages-build python.pkgs);
-          # check that the package can be imported
-          pythonImportsCheck = [ "text_statistics" ];
-          # the package does not have any tests
-          doCheck = false;
-          doInstallCheck = false;
-        };
-
-        # convert the package built above to an application
-        # a python application is essentially identical to a python package,
-        # but without the importable modules. as a result, it is smaller.
-        python-app = python.pkgs.toPythonApplication python-package;
+        python-app = get-python-app python.pkgs;
 
         # export the openapi schema
         openapi-schema = pkgs.stdenv.mkDerivation {
