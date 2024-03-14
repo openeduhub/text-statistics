@@ -7,6 +7,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from typing import Literal, Optional
 
+import numpy as np
 import nlprep.spacy as nlp
 import pyphen
 from nlprep import tokenize_documents
@@ -126,9 +127,9 @@ def initial_adjust_func(reading_speed: float, score: float) -> float:
     return reading_speed / 2 * math.exp(math.log(4) / 121.5 * score)
 
 
-def get_embeddings(text: str) -> list[list[float]]:
+def get_embeddings(text: str) -> list[float]:
     doc = list(tokenize_documents([text], tokenize_fun=nlp.tokenize_as_words))[0]
-    return [list(vector) for vector in nlp.get_word_vectors(doc)]
+    return np.array(nlp.get_word_vectors(doc)).sum(-2).tolist()
 
 
 def main():

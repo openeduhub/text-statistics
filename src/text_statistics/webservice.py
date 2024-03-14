@@ -2,14 +2,18 @@
 
 import argparse
 import json
+from typing import Optional
 
 import pyphen
 import uvicorn
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, conlist
 
 import text_statistics.stats as stats
 from text_statistics._version import __version__
+
+EMBEDDINGS_LEN = len(stats.get_embeddings("Test"))
+Embedding = conlist(float, min_items=EMBEDDINGS_LEN, max_items=EMBEDDINGS_LEN)
 
 
 class InputData(BaseModel):
@@ -23,7 +27,7 @@ class Result(BaseModel):
     classification: stats.Classification | None
     wiener_index: float | None
     reading_time: float | None
-    embeddings: list[list[float]] | None
+    embeddings: Optional[Embedding]
     version: str = __version__
 
 
