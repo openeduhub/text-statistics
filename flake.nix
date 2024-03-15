@@ -67,6 +67,7 @@
             })
           ];
         });
+        default = app;
         all = nixpkgs.lib.composeExtensions app python-lib;
       };
       lib = {
