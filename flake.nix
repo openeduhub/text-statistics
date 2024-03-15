@@ -56,9 +56,19 @@
     in
     {
       # define an overlay to add text-statistics to nixpkgs
-      overlays.default = (final: prev: {
-        inherit (self.packages.${final.system}) text-statistics;
-      });
+      overlays = rec {
+        app = (final: prev: {
+          inherit (self.packages.${final.system}) text-statistics;
+        });
+        python-lib = (final: prev: {
+          pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+            (python-final: python-prev: {
+              data-utils = self.outputs.lib.data-utils python-final;
+            })
+          ];
+        });
+        all = nixpkgs.lib.composeExtensions app python-lib;
+      };
       lib = {
         text-statistics = get-python-package;
       };
