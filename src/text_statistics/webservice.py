@@ -13,7 +13,7 @@ import text_statistics.stats as stats
 from text_statistics._version import __version__
 
 EMBEDDINGS_LEN = len(stats.get_embeddings("Test"))
-Embedding = conlist(float, min_items=EMBEDDINGS_LEN, max_items=EMBEDDINGS_LEN)
+Embedding = conlist(float, min_length=EMBEDDINGS_LEN, max_length=EMBEDDINGS_LEN)
 
 
 class InputData(BaseModel):
