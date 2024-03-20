@@ -66,7 +66,7 @@
           (final: prev: {
             pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
               (python-final: python-prev: {
-                data-utils = self.outputs.lib.data-utils python-final;
+                text-statistics = self.outputs.lib.text-statistics python-final;
               })
             ];
           });
