@@ -8,9 +8,9 @@ from collections.abc import Callable
 from typing import Literal, Optional
 
 import numpy as np
-import nlprep.spacy as nlp
+import its_prep.spacy as nlp
 import pyphen
-from nlprep import tokenize_documents
+from its_prep import tokenize_documents
 
 Classification = Literal[
     "Sehr leicht",

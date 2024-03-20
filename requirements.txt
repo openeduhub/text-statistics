@@ -2,4 +2,4 @@ pyphen
 pydantic
 fastapi
 uvicorn
-nlprep
+its_prep

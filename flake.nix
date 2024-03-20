@@ -6,7 +6,7 @@
     flake-utils.url = "github:numtide/flake-utils";
     nix-filter.url = "github:numtide/nix-filter";
     openapi-checks.url = "github:openeduhub/nix-openapi-checks";
-    nlprep.url = "github:openeduhub/nlprep";
+    its-prep.url = "github:openeduhub/its-prep";
   };
 
   outputs = { self, nixpkgs, flake-utils, ... }:
@@ -20,7 +20,7 @@
           fastapi
           pydantic
           uvicorn
-          (self.inputs.nlprep.lib.nlprep py-pkgs)
+          its-prep
         ];
 
       python-packages-devel = py-pkgs:
@@ -60,15 +60,19 @@
         app = (final: prev: {
           inherit (self.packages.${final.system}) text-statistics;
         });
-        python-lib = (final: prev: {
-          pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-            (python-final: python-prev: {
-              data-utils = self.outputs.lib.data-utils python-final;
-            })
-          ];
-        });
         default = app;
-        all = nixpkgs.lib.composeExtensions app python-lib;
+        python-lib = nixpkgs.lib.composeExtensions
+          self.inputs.its-prep.overlays.default
+          (final: prev: {
+            pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+              (python-final: python-prev: {
+                data-utils = self.outputs.lib.data-utils python-final;
+              })
+            ];
+          });
+        all = nixpkgs.lib.composeExtensions
+          app
+          python-lib;
       };
       lib = {
         text-statistics = get-python-package;
@@ -76,7 +80,8 @@
     } // flake-utils.lib.eachDefaultSystem (system:
       let
         # a specific build for a specific system
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = nixpkgs.legacyPackages.${system}.extend
+          self.inputs.its-prep.overlays.default;
         openapi-checks = self.inputs.openapi-checks.lib.${system};
         python = pkgs.python3;
         python-app = get-python-app python.pkgs;
