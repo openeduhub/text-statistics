@@ -129,7 +129,14 @@ def initial_adjust_func(reading_speed: float, score: float) -> float:
 
 def get_embeddings(text: str) -> list[float]:
     doc = list(tokenize_documents([text], tokenize_fun=nlp.tokenize_as_words))[0]
-    return np.array(nlp.get_word_vectors(doc)).sum(-2).tolist()
+    word_embeddings = np.array(nlp.get_word_vectors(doc))
+
+    # if the text does not contain any tokens, the resulting word embeddings
+    # will not have the proper shape -> catch this case early
+    if len(word_embeddings.shape) < 2:
+        return word_embeddings.tolist()
+
+    return word_embeddings.sum(-2).tolist()
 
 
 def main():
