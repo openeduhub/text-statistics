@@ -44,9 +44,6 @@
         propagatedBuildInputs = (python-packages-build py-pkgs);
         # check that the package can be imported
         pythonImportsCheck = [ "text_statistics" ];
-        # the package does not have any tests
-        doCheck = false;
-        doInstallCheck = false;
       };
 
       # convert the package built above to an application
