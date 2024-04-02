@@ -63,16 +63,13 @@
           (final: prev: {
             pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
               (python-final: python-prev: {
-                text-statistics = self.outputs.lib.text-statistics python-final;
+                text-statistics = get-python-package python-final;
               })
             ];
           });
         all = nixpkgs.lib.composeExtensions
           app
           python-lib;
-      };
-      lib = {
-        text-statistics = get-python-package;
       };
     } // flake-utils.lib.eachDefaultSystem (system:
       let
